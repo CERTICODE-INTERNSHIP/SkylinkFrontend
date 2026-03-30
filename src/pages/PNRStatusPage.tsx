@@ -1,7 +1,7 @@
 const HomePage = () => {
   return (
     <div>
-      <h1>Login Page</h1>
+      <h1>PNR Status Page</h1>
     </div>
   )
 }

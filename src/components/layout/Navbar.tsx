@@ -1,43 +1,52 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/store/useAuthStore";
-
+import BlueSkylinkLogo from "../../../public/logos/Logo 1.png";
 const Navbar = () => {
   const { isAuthenticated, user } = useAuthStore();
   const isAdmin = user?.role === "admin";
 
   return (
-    <nav className="flex flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3 text-sm">
-      <Link to={ROUTES.HOME}>Home</Link>
-      <Link to={ROUTES.SEARCH_RESULTS}>Search</Link>
-      <Link to={ROUTES.PNR_STATUS}>PNR Status</Link>
+    <header className="bg-white">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link to={ROUTES.HOME} className="flex items-center gap-3">
+          <img src={BlueSkylinkLogo} alt="SkyLink" className="h-9.5 w-auto" />
+        </Link>
 
-      {!isAuthenticated ? (
-        <>
-          <Link to={ROUTES.LOGIN}>Login</Link>
-          <Link to={ROUTES.REGISTER}>Register</Link>
-          <Link to={ROUTES.ADMIN_LOGIN}>Admin Login</Link>
-        </>
-      ) : null}
+        <div className="hidden items-center gap-8 text-sm font-medium text-slate-500 md:flex">
+          <Link to={ROUTES.SEARCH_RESULTS} className="hover:text-slate-800">
+            Book
+          </Link>
+          <Link to={ROUTES.HOME} className="hover:text-slate-800">
+            Explore
+          </Link>
+          <Link to={ROUTES.PNR_STATUS} className="hover:text-slate-800">
+            Flight Status
+          </Link>
+          <Link to={ROUTES.MY_BOOKINGS} className="hover:text-slate-800">
+            Manage
+          </Link>
+        </div>
 
-      {isAuthenticated ? (
-        <>
-          <Link to={ROUTES.USER_DASHBOARD}>Dashboard</Link>
-          <Link to={ROUTES.BOOKING}>Booking</Link>
-          <Link to={ROUTES.MY_BOOKINGS}>My Bookings</Link>
-          <Link to={ROUTES.PAYMENT}>Payment</Link>
-        </>
-      ) : null}
-
-      {isAdmin ? (
-        <>
-          <Link to={ROUTES.ADMIN_DASHBOARD}>Admin</Link>
-          <Link to={ROUTES.ADMIN_FLIGHTS}>Flights</Link>
-          <Link to={ROUTES.ADMIN_USERS}>Users</Link>
-          <Link to={ROUTES.ADMIN_REPORTS}>Reports</Link>
-        </>
-      ) : null}
-    </nav>
+        <div className="flex items-center gap-3">
+          {!isAuthenticated ? (
+            <Link
+              to={ROUTES.LOGIN}
+              className="rounded-md border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 hover:border-slate-400 hover:text-slate-800"
+            >
+              Sign In
+            </Link>
+          ) : (
+            <Link
+              to={isAdmin ? ROUTES.ADMIN_DASHBOARD : ROUTES.USER_DASHBOARD}
+              className="rounded-md bg-[var(--sky-primary)] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[var(--sky-primary-dark)]"
+            >
+              {isAdmin ? "Admin" : "Dashboard"}
+            </Link>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 };
 

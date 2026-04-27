@@ -2,16 +2,14 @@ import axiosClient from "./axiosClient";
 import { handleApiError } from "./api.helpers";
 import type { User } from "@/types";
 import type {
-  LoginCredentials,
-  RegisterPayload,
-  TokenResponse,
-  ForgotPasswordPayload,
-  ResetPasswordPayload,
-  ResendVerificationPayload,
-  MessageResponse,
-} from "@/types/auth.types";
+  LoginFormValues,
+  RegisterFormValues,
+  ForgotPasswordFormValues,
+  ResetPasswordFormValues,
+} from "@/validation/auth.schemas";
+import type { TokenResponse, MessageResponse } from "@/types/api.types";
 
-export async function login(credentials: LoginCredentials): Promise<TokenResponse> {
+export async function login(credentials: LoginFormValues): Promise<TokenResponse> {
   try {
     const res = await axiosClient.post<TokenResponse>("/auth/login", credentials);
     return res.data;
@@ -21,7 +19,7 @@ export async function login(credentials: LoginCredentials): Promise<TokenRespons
   }
 }
 
-export async function register(payload: RegisterPayload): Promise<User> {
+export async function register(payload: Omit<RegisterFormValues, "confirmPassword">): Promise<User> {
   try {
     const res = await axiosClient.post<User>("/auth/register", payload);
     return res.data;
@@ -41,7 +39,7 @@ export async function getProfile(): Promise<User> {
   }
 }
 
-export async function forgotPassword(payload: ForgotPasswordPayload): Promise<MessageResponse> {
+export async function forgotPassword(payload: ForgotPasswordFormValues): Promise<MessageResponse> {
   try {
     const res = await axiosClient.post<MessageResponse>("/auth/forgot-password", payload);
     return res.data;
@@ -51,7 +49,7 @@ export async function forgotPassword(payload: ForgotPasswordPayload): Promise<Me
   }
 }
 
-export async function resetPassword(payload: ResetPasswordPayload): Promise<MessageResponse> {
+export async function resetPassword(payload: Omit<ResetPasswordFormValues, "confirmPassword">): Promise<MessageResponse> {
   try {
     const res = await axiosClient.post<MessageResponse>("/auth/reset-password", payload);
     return res.data;
@@ -61,9 +59,9 @@ export async function resetPassword(payload: ResetPasswordPayload): Promise<Mess
   }
 }
 
-export async function resendVerification(payload: ResendVerificationPayload): Promise<MessageResponse> {
+export async function resendVerification(email: string): Promise<MessageResponse> {
   try {
-    const res = await axiosClient.post<MessageResponse>("/auth/resend-verification", payload);
+    const res = await axiosClient.post<MessageResponse>("/auth/resend-verification", { email });
     return res.data;
   } catch (err) {
     handleApiError(err);

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import axiosClient from "@/api/axiosClient";
 import {
   login as apiLogin,
   register as apiRegister,
@@ -27,8 +28,9 @@ export function useAuth() {
     async (credentials: LoginCredentials) => {
       const { access_token } = await apiLogin(credentials);
 
-      // Temporarily store token so axiosClient interceptor sends it with /auth/me
-      store.login(access_token, null);
+      // Set header directly so /auth/me request is authenticated immediately
+      // (store.login is async state update — localStorage may not be ready in time)
+      axiosClient.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 
       const user = await getProfile();
       store.login(access_token, user);
@@ -45,7 +47,7 @@ export function useAuth() {
   }, []);
 
   /**
-   * Logout: clears token + user from store and localStorage.
+
    */
   const signOut = useCallback(() => {
     store.logout();

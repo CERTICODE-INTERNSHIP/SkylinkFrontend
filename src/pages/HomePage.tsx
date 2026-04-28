@@ -2,7 +2,7 @@ import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
 
 const HomePage = () => {
   return (
-    <ScreenPlaceholder
+<ScreenPlaceholder
       id="S-01"
       title="Homepage"
       scope="public"

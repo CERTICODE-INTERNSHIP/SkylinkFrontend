@@ -39,7 +39,7 @@ const Navbar = () => {
           ) : (
             <Link
               to={isAdmin ? ROUTES.ADMIN_DASHBOARD : ROUTES.USER_DASHBOARD}
-              className="rounded-md bg-[var(--sky-primary)] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[var(--sky-primary-dark)]"
+              className="rounded-md bg-(--sky-primary)] px-4 py-1.5 text-sm font-semibold text-white hover:bg-(--sky-primary-dark)]"
             >
               {isAdmin ? "Admin" : "Dashboard"}
             </Link>

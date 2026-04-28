@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AuthContext, type AuthContextType, type User } from "./authContext";
+import { isTokenExpired } from "@/utils/token";
 
 export type { User, AuthContextType } from "./authContext";
 
@@ -8,7 +9,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return localStorage.getItem("token");
+      const stored = localStorage.getItem("token");
+      if (!stored || isTokenExpired(stored)) {
+        localStorage.removeItem("token");
+        return null;
+      }
+      return stored;
     } catch {
       return null;
     }

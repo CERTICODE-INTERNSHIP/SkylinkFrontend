@@ -1,27 +1,20 @@
-export type UserRole = "guest" | "user" | "admin";
+// Matches backend role_id: 1 = admin, 2 = passenger
+// "guest" is frontend-only — unauthenticated user, no DB record
+export type UserRole = "guest" | "passenger" | "admin";
 
-export type UserStatus = "active" | "suspended" | "pending_verification";
-
-export interface UserPreferences {
-  notificationsEnabled?: boolean;
-  marketingOptIn?: boolean;
-  preferredCurrency?: string;
-  preferredLanguage?: string;
-}
-
+// Matches backend UserRead exactly
 export interface User {
   id: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  role?: UserRole | string;
-  status?: UserStatus;
-  preferences?: UserPreferences;
-  createdAt?: string;
-  updatedAt?: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role_id: number;
+  is_active: boolean;
+  phone_number: string | null;
+  created_at: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  user: User | null;
 }

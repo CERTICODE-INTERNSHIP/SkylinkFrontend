@@ -1,5 +1,5 @@
 
-import Global from "../../../public/logos/Vector.png";
+import Global from "@/assets/logos/Vector.png";
 
 export default function Footer() {
   return (

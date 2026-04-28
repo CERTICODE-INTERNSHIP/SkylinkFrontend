@@ -4,10 +4,7 @@ import { phoneSchema, requiredString } from "./common.schemas";
 export const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters")
-  .regex(/[a-z]/, "Password must include a lowercase letter")
-  .regex(/[A-Z]/, "Password must include an uppercase letter")
-  .regex(/[0-9]/, "Password must include a number")
-  .regex(/[^A-Za-z0-9]/, "Password must include a special character");
+  .max(72, "Password must be at most 72 characters");
 
 export const loginSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -16,9 +13,10 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    name: requiredString("Name"),
+    first_name: requiredString("First name"),
+    last_name: requiredString("Last name"),
     email: z.string().trim().email("Invalid email address"),
-    phone: phoneSchema.optional(),
+    phone_number: phoneSchema.optional(),
     password: passwordSchema,
     confirmPassword: requiredString("Confirm password"),
   })
@@ -34,10 +32,10 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z
   .object({
     token: requiredString("Reset token"),
-    password: passwordSchema,
+    new_password: passwordSchema,
     confirmPassword: requiredString("Confirm password"),
   })
-  .refine((payload) => payload.password === payload.confirmPassword, {
+  .refine((payload) => payload.new_password === payload.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });

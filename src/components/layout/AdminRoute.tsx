@@ -12,7 +12,7 @@ const AdminRoute = () => {
     );
   }
 
-  if (user?.role !== "admin") {
+  if (user?.role_id !== 1) {
     return <Navigate to={ROUTES.UNAUTHORIZED} replace />;
   }
 

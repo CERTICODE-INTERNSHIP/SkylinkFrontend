@@ -9,7 +9,7 @@ const PublicOnlyRoute = () => {
     return <Outlet />;
   }
 
-  if (user?.role === "admin") {
+  if (user?.role_id === 1) {
     return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
   }
 

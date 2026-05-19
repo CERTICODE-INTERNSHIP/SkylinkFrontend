@@ -7,6 +7,7 @@ export const ROUTES = {
   FLIGHT_DETAIL: "/flights/:id",
   PNR_STATUS: "/pnr-status",
   MANAGE: "/manage",
+  EXPLORE_DESTINATION: "/explore/destination",
   LOGIN: "/login",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",

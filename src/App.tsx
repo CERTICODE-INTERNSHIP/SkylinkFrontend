@@ -15,6 +15,7 @@ import BookingPage from "@/pages/BookingPage";
 import BookingDetailPage from "@/pages/BookingDetailPage";
 import MyBookingsPage from "@/pages/MyBookingsPage";
 import PaymentPage from "@/pages/PaymentPage";
+import ResultsBookingPage from "@/pages/BookingResultPagesFolder/ResultsBookingPage/ResultsBookingPage";
 import FlightStatusPage from "@/pages/MainPagesFolder/FlightStatusPage/FlightStatusPage";
 import ManagePage from "@/pages/MainPagesFolder/ManagePage/ManagePage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
@@ -59,15 +60,7 @@ function App() {
           />
           <Route path={ROUTES.EXPLORE_PROMOS} element={<PromosPage />} />
           <Route path={ROUTES.EXPLORE_PROMO_DETAIL} element={<DeaPage />} />
-          <Route
-            path={ROUTES.FLIGHT_DETAIL}
-            element={screen(
-              "S-03",
-              "Flight Detail",
-              "public",
-              "Flight detail with fare rules, baggage info, and book now action.",
-            )}
-          />
+          <Route path={ROUTES.FLIGHT_DETAIL} element={<ResultsBookingPage />} />
           <Route path={ROUTES.PNR_STATUS} element={<FlightStatusPage />} />
           <Route path={ROUTES.MANAGE} element={<ManagePage />} />
           <Route

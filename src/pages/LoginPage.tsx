@@ -82,9 +82,13 @@ const LoginPage = ({ defaultTab = "login" }: LoginPageProps) => {
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setServerError(null);
     try {
-      const { confirmPassword, ...payload } = data;
-      void confirmPassword;
-      await signUp(payload);
+      await signUp({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone_number: data.phone_number,
+        password: data.password,
+      });
       setSuccessMsg(
         "Registration successful! Please check your email to verify your account.",
       );

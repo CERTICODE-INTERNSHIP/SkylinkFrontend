@@ -2,7 +2,7 @@ import React from "react";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
-  error?: string | null;
+  error?: string | null | undefined;
 };
 
 const Input: React.FC<InputProps> = ({

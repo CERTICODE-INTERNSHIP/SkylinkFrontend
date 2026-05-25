@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import Navbar from "@/pages/_shared/components/layout/Navbar";
 import Footer from "@/pages/_shared/components/layout/Footer";
@@ -24,6 +24,8 @@ import FlightStatusPage from "@/pages/MainPagesFolder/FlightStatusPage/FlightSta
 import ManagePage from "@/pages/MainPagesFolder/ManagePage/ManagePage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminFlightsPage from "@/pages/admin/AdminFlightsPage";
+import AdminAddFlightPage from "@/pages/admin/AdminAddFlightPage";
+import AdminEditFlightPage from "@/pages/admin/AdminEditFlightPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminReportsPage from "@/pages/admin/AdminReportsPage";
 import ExplorePage from "@/pages/MainPagesFolder/ExplorePage/ExplorePage";
@@ -47,10 +49,13 @@ function screen(
   );
 }
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!isAdminRoute && <Navbar />}
       <main>
         <Routes>
           {/* Public Routes */}
@@ -222,21 +227,11 @@ function App() {
             <Route path={ROUTES.ADMIN_FLIGHTS} element={<AdminFlightsPage />} />
             <Route
               path={ROUTES.ADMIN_ADD_FLIGHT}
-              element={screen(
-                "A-04",
-                "Add Flight",
-                "admin",
-                "Create and publish flight inventory with validation constraints.",
-              )}
+              element={<AdminAddFlightPage />}
             />
             <Route
               path={ROUTES.ADMIN_EDIT_FLIGHT}
-              element={screen(
-                "A-05",
-                "Edit Flight",
-                "admin",
-                "Edit existing flight with affected-booking warning banner.",
-              )}
+              element={<AdminEditFlightPage />}
             />
             <Route
               path={ROUTES.ADMIN_DELETE_FLIGHT}
@@ -326,7 +321,15 @@ function App() {
           />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

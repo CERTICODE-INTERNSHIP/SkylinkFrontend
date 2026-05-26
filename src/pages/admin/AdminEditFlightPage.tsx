@@ -36,6 +36,11 @@ const AdminEditFlightPage = () => {
       if (!id) return;
       try {
         const flight = await getFlightById(id);
+                if (!flight) {
+          setServerError("Flight not found.");
+          setIsLoading(false);
+          return;
+        }
         // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
         const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString().slice(0, 16) : "";
         const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString().slice(0, 16) : "";

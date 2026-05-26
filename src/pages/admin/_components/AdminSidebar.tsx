@@ -1,5 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/utils/cn";
 import {
   LayoutDashboard,
@@ -21,6 +22,13 @@ type AdminSidebarProps = {
 
 const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = () => {
+    signOut();
+    navigate(ROUTES.LOGIN);
+  };
 
   const menuItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: ROUTES.ADMIN_DASHBOARD },
@@ -120,7 +128,10 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                 <p className="truncate text-xs text-slate-400">My Profile</p>
               </div>
             </div>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-colors">
+            <button 
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            >
               <LogOut size={20} />
               Log Out
             </button>

@@ -11,6 +11,8 @@ import PassengerSelector, {
   type PassengerCounts,
 } from "./components/PassengerSelector";
 import { getPromotions } from "@/api/promotions.api";
+import { searchFlights } from "@/api/flights.api";
+import type { Flight } from "@/types";
 import type { Promotion } from "@/types/promotion.types";
 import { cn } from "@/utils/cn";
 
@@ -39,63 +41,6 @@ type AirportOption = {
   airport: string;
   country: string;
 };
-
-const POPULAR_ROUTES: Route[] = [
-  {
-    id: "1",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Cebu",
-    toCode: "CEB",
-    price: "₱1,890",
-    duration: "1h 20m",
-  },
-  {
-    id: "2",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Davao",
-    toCode: "DVO",
-    price: "₱1,750",
-    duration: "1h 45m",
-  },
-  {
-    id: "3",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Palawan",
-    toCode: "PPS",
-    price: "₱2,499",
-    duration: "1h 20m",
-  },
-  {
-    id: "4",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Boracay",
-    toCode: "KLO",
-    price: "₱1,650",
-    duration: "1h 10m",
-  },
-  {
-    id: "5",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Singapore",
-    toCode: "SIN",
-    price: "₱7,500",
-    duration: "4h 00m",
-  },
-  {
-    id: "6",
-    from: "Manila",
-    fromCode: "MNL",
-    to: "Hong Kong",
-    toCode: "HKG",
-    price: "₱11,200",
-    duration: "2h 30m",
-  },
-];
 
 const AIRPORTS: AirportOption[] = [
   {
@@ -192,8 +137,8 @@ function DealCard({ deal }: { deal: Promotion }) {
           id: deal.id,
           title: deal.title,
           description: deal.title,
-          price: `₱${deal.sale_price.toLocaleString()}`,
-          oldPrice: `₱${deal.original_price.toLocaleString()}`,
+          price: `₱${(deal.sale_price || 0).toLocaleString()}`,
+          oldPrice: `₱${(deal.original_price || 0).toLocaleString()}`,
           discount: `-${discount}%`,
           validUntil: deal.valid_until,
           image: deal.image_url ?? "",
@@ -229,12 +174,12 @@ function DealCard({ deal }: { deal: Promotion }) {
           <span
             className={`${typography.heading.h3.bold} font-extrabold text-[#496B92]`}
           >
-            ₱{deal.sale_price.toLocaleString()}
+            ₱{(deal.sale_price || 0).toLocaleString()}
           </span>
           <span
             className={`${typography.paragraph.sm.medium} ${colors.text.secondary} line-through`}
           >
-            ₱{deal.original_price.toLocaleString()}
+            ₱{(deal.original_price || 0).toLocaleString()}
           </span>
         </div>
         <div
@@ -394,23 +339,29 @@ const BookingLandingPage = () => {
   const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
   const [openField, setOpenField] = useState<"from" | "to" | null>(null);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [isPromosLoading, setIsPromosLoading] = useState(true);
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchPromos = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getPromotions();
-        setPromotions(data);
+        const [promosData, flightsData] = await Promise.all([
+          getPromotions(),
+          searchFlights(),
+        ]);
+        setPromotions(promosData || []);
+        setFlights(flightsData || []);
       } catch (err) {
-        console.error("Failed to fetch promos", err);
+        console.error("Failed to fetch landing page data", err);
       } finally {
-        setIsPromosLoading(false);
+        setIsLoading(false);
       }
     };
-    fetchPromos();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -460,24 +411,45 @@ const BookingLandingPage = () => {
     return `${ROUTES.SEARCH_RESULTS}?${params.toString()}`;
   })();
 
+  const popularRoutes: Route[] = useMemo(() => {
+    const seen = new Set<string>();
+    const routes: Route[] = [];
+    (flights || []).forEach((flight) => {
+      const key = `${flight.origin}-${flight.destination}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        routes.push({
+          id: flight.id,
+          from: flight.originCity || flight.origin,
+          fromCode: flight.origin,
+          to: flight.destinationCity || flight.destination,
+          toCode: flight.destination,
+          price: `₱${(flight.price || 0).toLocaleString()}`,
+          duration: "1h 20m", // Default or calculated
+        });
+      }
+    });
+    return routes.slice(0, 6);
+  }, [flights]);
+
   const derivedDestinations: Destination[] = useMemo(() => {
     const seen = new Set<string>();
     const dests: Destination[] = [];
-    promotions.forEach((promo) => {
-      if (!seen.has(promo.destination_code)) {
-        seen.add(promo.destination_code);
+    (flights || []).forEach((flight) => {
+      if (flight.destination && !seen.has(flight.destination)) {
+        seen.add(flight.destination);
         dests.push({
-          id: promo.id,
-          code: promo.destination_code,
-          city: promo.destination_city,
-          startingFrom: `From ₱${promo.sale_price.toLocaleString()}`,
+          id: flight.id,
+          code: flight.destination,
+          city: flight.destinationCity || flight.destination,
+          startingFrom: `From ₱${(flight.price || 0).toLocaleString()}`,
           bgClass: "bg-primary-60",
-          image: promo.image_url ?? "",
+          image: flight.imageUrl ?? "",
         });
       }
     });
     return dests.slice(0, 4);
-  }, [promotions]);
+  }, [flights]);
 
 
   return (
@@ -647,7 +619,7 @@ const BookingLandingPage = () => {
             linkLabel="See all deals"
             to={ROUTES.EXPLORE_PROMOS}
           />
-          {isPromosLoading ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((n) => (
                 <div
@@ -676,11 +648,27 @@ const BookingLandingPage = () => {
             linkLabel="Explore all"
             to={ROUTES.SEARCH_RESULTS}
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {POPULAR_ROUTES.map((route) => (
-              <RouteCard key={route.id} route={route} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className="h-[80px] rounded-[14px] bg-slate-100 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {popularRoutes.map((route) => (
+                <RouteCard key={route.id} route={route} />
+              ))}
+              {popularRoutes.length === 0 && (
+                <p className="col-span-full text-center py-10 text-slate-500 font-medium">
+                  No routes available at the moment.
+                </p>
+              )}
+            </div>
+          )}
         </section>
 
         {derivedDestinations.length > 0 && (

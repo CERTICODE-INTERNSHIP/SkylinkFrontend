@@ -7,6 +7,8 @@ import { FiMapPin } from "react-icons/fi";
 import { RiPriceTagLine } from "react-icons/ri";
 import { HiChevronRight } from "react-icons/hi2";
 import { getPromotions } from "@/api/promotions.api";
+import { searchFlights } from "@/api/flights.api";
+import type { Flight } from "@/types";
 import type { Promotion } from "@/types/promotion.types";
 
 // ─── Derived types ────────────────────────────────────────────────────────────
@@ -127,37 +129,42 @@ function DealCard({ deal }: { deal: Deal }) {
 const ExplorePage = () => {
   const [search, setSearch] = useState("");
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPromos = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getPromotions();
-        setPromotions(data);
+        const [promosData, flightsData] = await Promise.all([
+          getPromotions(),
+          searchFlights(),
+        ]);
+        setPromotions(promosData || []);
+        setFlights(flightsData || []);
       } catch (err) {
-        console.error("Failed to fetch promos", err);
+        console.error("Failed to fetch explore page data", err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchPromos();
+    fetchData();
   }, []);
 
   const destinations = useMemo(() => {
     const seen = new Set<string>();
     const dests: Destination[] = [];
-    (promotions || []).forEach((promo) => {
-      if (promo && promo.destination_code && !seen.has(promo.destination_code)) {
-        seen.add(promo.destination_code);
+    (flights || []).forEach((flight) => {
+      if (flight.destination && !seen.has(flight.destination)) {
+        seen.add(flight.destination);
         dests.push({
-          id: promo.id,
-          code: promo.destination_code,
-          name: promo.destination_city || "Destination",
+          id: flight.id,
+          code: flight.destination,
+          name: flight.destinationCity || flight.destination,
           location: "Philippines",
           duration: "1h 20m",
-          price: `From ₱${(promo.sale_price || 0).toLocaleString()}`,
+          price: `From ₱${(flight.price || 0).toLocaleString()}`,
           bgClass: "bg-primary-60",
-          image: promo.image_url ?? "",
+          image: flight.imageUrl ?? "",
         });
       }
     });
@@ -169,7 +176,7 @@ const ExplorePage = () => {
         .toLowerCase()
         .includes(query),
     );
-  }, [promotions, search]);
+  }, [flights, search]);
 
   const deals = useMemo(() => {
     const query = search.trim().toLowerCase();

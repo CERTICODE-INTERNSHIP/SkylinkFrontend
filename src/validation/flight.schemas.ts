@@ -37,14 +37,15 @@ export const flightSchema = z.object({
   destination: requiredString("Destination"),
   departureTime: dateStringSchema,
   arrivalTime: dateStringSchema,
-  price: z.coerce.number().min(0, "Price must be positive"),
   airline: requiredString("Airline"),
-  seatsAvailable: z.coerce.number().int().min(0, "Seats must be positive"),
-  totalSeats: z.coerce.number().int().min(1, "Total seats is required"),
+  aircraftId: z.coerce.number().min(1, "Aircraft is required"),
+  seat_pricing: z.array(z.object({
+    seat_class_id: z.number(),
+    price: z.coerce.number().min(0, "Price must be positive"),
+  })).min(1, "At least one price configuration is required"),
   status: z
     .enum(["scheduled", "boarding", "on_time", "delayed", "cancelled", "landed"])
     .default("scheduled"),
-  cabinClass: z.enum(["economy", "premium_economy", "business", "first"]),
   baggageAllowanceKg: z.coerce.number().min(0).optional(),
   stops: z.coerce.number().int().min(0).default(0),
   imageUrl: z.string().url("Must be a valid URL").or(z.literal("")).optional(),

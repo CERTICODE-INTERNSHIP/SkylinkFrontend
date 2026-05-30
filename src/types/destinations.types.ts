@@ -12,11 +12,30 @@ export interface Aircraft {
   model: string;
   total_seats: number;
   registration: string;
+  seats?: Seat[];
 }
 
 export interface SeatClass {
   id: number;
   name: string;
+}
+
+export interface Seat {
+  id: number;
+  aircraft_id: number;
+  seat_number: string;
+  seat_class_id: number;
+  seat_class?: SeatClass;
+}
+
+export interface SeatConfiguration {
+  seat_class_id: number;
+  quantity: number;
+}
+
+export interface CreateSeatPayload {
+  seat_number: string;
+  seat_class_id: number;
 }
 
 export interface CreateAirportPayload {
@@ -36,13 +55,12 @@ export interface UpdateAirportPayload {
 
 export interface CreateAircraftPayload {
   model: string;
-  total_seats: number;
   registration: string;
+  seat_configurations: SeatConfiguration[];
 }
 
 export interface UpdateAircraftPayload {
   model?: string;
-  total_seats?: number;
   registration?: string;
 }
 

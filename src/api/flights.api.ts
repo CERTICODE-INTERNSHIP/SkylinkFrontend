@@ -36,7 +36,7 @@ const mapBackendFlight = (f: any): Flight => {
 };
 
 // Helper to map frontend data to backend payload
-const mapFrontendToBackend = (payload: Partial<Flight>) => {
+const mapFrontendToBackend = (payload: any) => {
   const AIRPORT_MAP: Record<string, number> = { MNL: 1, CEB: 2, DVO: 3, ILO: 4, BCD: 5 };
   
   const mapped = {
@@ -47,16 +47,12 @@ const mapFrontendToBackend = (payload: Partial<Flight>) => {
     arrival_time: payload.arrivalTime,
     status: payload.status,
     airline: payload.airline,
-    aircraft_id: 1, // Default aircraft
+    aircraft_id: payload.aircraftId,
     image_url: payload.imageUrl,
-    seat_pricing: [
-      { 
-        seat_class_id: 1, // Mapping everything to Economy for now in this simplified payload
-        total_seats: payload.totalSeats || 153, 
-        available_seats: payload.seatsAvailable || 153, 
-        price: Math.round((payload.price || 0) * 100) // Price is in cents in backend
-      },
-    ]
+    seat_pricing: payload.seat_pricing.map((p: any) => ({
+      seat_class_id: p.seat_class_id,
+      price: Math.round(Number(p.price) * 100) // Price is in cents in backend
+    }))
   };
 
   console.log("Sending to backend:", mapped);

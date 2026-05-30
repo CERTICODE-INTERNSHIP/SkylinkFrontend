@@ -12,7 +12,7 @@ import {
   getSeatClasses, createSeatClass, updateSeatClass, deleteSeatClass,
 } from "@/api/destinations.api";
 import type {
-  Airport, Aircraft, SeatClass,
+  Airport, Aircraft, SeatClass, SeatConfiguration,
 } from "@/types/destinations.types";
 
 type Tab = "airports" | "aircraft" | "seat-classes";
@@ -36,16 +36,26 @@ const AdminDestinationsPage = () => {
 
   // Form state
   const [form, setForm] = useState<Record<string, string | number>>({});
+  const [seatConfigs, setSeatConfigs] = useState<SeatConfiguration[]>([]);
 
   const fetchAll = async () => {
     setIsLoading(true);
     try {
-      const [a, ac, sc] = await Promise.all([getAirports(), getAircraft(), getSeatClasses()]);
-      setAirports(a);
-      setAircraft(ac);
-      setSeatClasses(sc);
+      const [a, ac, sc] = await Promise.allSettled([
+        getAirports(),
+        getAircraft(),
+        getSeatClasses()
+      ]);
+      
+      if (a.status === "fulfilled") setAirports(a.value);
+      if (ac.status === "fulfilled") setAircraft(ac.value);
+      else if (ac.reason?.response?.status === 500) {
+        console.error("Aircraft fetch failed (500). Missing eager loading in backend?");
+      }
+      if (sc.status === "fulfilled") setSeatClasses(sc.value);
+
     } catch (err) {
-      console.error("Failed to fetch destinations data", err);
+      console.error("Unexpected error in fetchAll", err);
     } finally {
       setIsLoading(false);
     }
@@ -53,19 +63,51 @@ const AdminDestinationsPage = () => {
 
   useEffect(() => { fetchAll(); }, []);
 
-  const openAdd = () => { setForm({}); setAddModalOpen(true); };
+  const openAdd = () => { 
+    setForm({}); 
+    // Start with one default config if it's aircraft
+    setSeatConfigs([{ seat_class_id: seatClasses[0]?.id || 1, quantity: 150 }]);
+    setAddModalOpen(true); 
+  };
   const openEdit = (item: Airport | Aircraft | SeatClass) => { setSelectedItem(item); setForm({ ...item }); setEditModalOpen(true); };
   const openDelete = (item: Airport | Aircraft | SeatClass) => { setSelectedItem(item); setDeleteModalOpen(true); };
 
-  const handleAdd = async () => {
+  const handleAdd = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
+    // Aircraft specific validation
+    if (activeTab === "aircraft" && (!form.model || !form.registration)) {
+      alert("Please fill in Model and Registration Number");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (activeTab === "airports") await createAirport(form as any);
-      if (activeTab === "aircraft") await createAircraft({ ...form, total_seats: Number(form.total_seats) } as any);
+      if (activeTab === "aircraft") {
+        const payload = { 
+          model: String(form.model),
+          registration: String(form.registration),
+          seat_configurations: seatConfigs.map(c => ({ 
+            seat_class_id: Number(c.seat_class_id), 
+            quantity: Number(c.quantity) 
+          }))
+        };
+        console.log("Creating Aircraft with Batch Payload:", payload);
+        await createAircraft(payload);
+      }
       if (activeTab === "seat-classes") await createSeatClass(form as any);
       setAddModalOpen(false);
       fetchAll();
-    } catch (err) { console.error(err); }
+    } catch (err: any) { 
+      console.error("Add failed:", err);
+      const detail = err.details?.detail;
+      const errorMessage = Array.isArray(detail) 
+        ? detail.map((d: any) => `${d.loc.join('.')}: ${d.msg}`).join(' | ')
+        : typeof detail === 'string' ? detail : (err.message || "Failed to add item");
+      
+      alert(`Error: ${errorMessage}`);
+    }
     finally { setIsSubmitting(false); }
   };
 
@@ -74,7 +116,7 @@ const AdminDestinationsPage = () => {
     setIsSubmitting(true);
     try {
       if (activeTab === "airports") await updateAirport(selectedItem.id, form as any);
-      if (activeTab === "aircraft") await updateAircraft(selectedItem.id, { ...form, total_seats: Number(form.total_seats) } as any);
+      if (activeTab === "aircraft") await updateAircraft(selectedItem.id, { model: String(form.model), registration: String(form.registration) });
       if (activeTab === "seat-classes") await updateSeatClass(selectedItem.id, form as any);
       setEditModalOpen(false);
       fetchAll();
@@ -186,7 +228,60 @@ const AdminDestinationsPage = () => {
       <div className="space-y-4">
         {field("registration", "Registration No. *")}
         {field("model", "Model *")}
-        {field("total_seats", "Total Seats *", "number")}
+        
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Configuration (Automation)</label>
+            <button 
+              type="button"
+              onClick={() => setSeatConfigs([...seatConfigs, { seat_class_id: seatClasses[0]?.id || 1, quantity: 0 }])}
+              className="text-xs font-bold text-[#496B92] hover:underline"
+            >
+              + Add Class
+            </button>
+          </div>
+          
+          {seatConfigs.map((config, idx) => (
+            <div key={idx} className="flex gap-2 items-end bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="flex-1 space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase">Class</label>
+                <select
+                  value={config.seat_class_id}
+                  onChange={(e) => {
+                    const updated = [...seatConfigs];
+                    updated[idx].seat_class_id = Number(e.target.value);
+                    setSeatConfigs(updated);
+                  }}
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]"
+                >
+                  {seatClasses.map(sc => (
+                    <option key={sc.id} value={sc.id}>{sc.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-24 space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase">Qty</label>
+                <input
+                  type="number"
+                  value={config.quantity}
+                  onChange={(e) => {
+                    const updated = [...seatConfigs];
+                    updated[idx].quantity = Number(e.target.value);
+                    setSeatConfigs(updated);
+                  }}
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]"
+                />
+              </div>
+              <button 
+                type="button"
+                onClick={() => setSeatConfigs(seatConfigs.filter((_, i) => i !== idx))}
+                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     );
     return (
@@ -211,7 +306,6 @@ const AdminDestinationsPage = () => {
       <div className="space-y-4">
         {field("registration", "Registration No.")}
         {field("model", "Model")}
-        {field("total_seats", "Total Seats", "number")}
       </div>
     );
     return (

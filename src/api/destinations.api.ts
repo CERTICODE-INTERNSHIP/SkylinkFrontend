@@ -1,9 +1,10 @@
 import axiosClient from "./axiosClient";
 import type {
-  Airport, Aircraft, SeatClass,
+  Airport, Aircraft, SeatClass, Seat,
   CreateAirportPayload, UpdateAirportPayload,
   CreateAircraftPayload, UpdateAircraftPayload,
   CreateSeatClassPayload, UpdateSeatClassPayload,
+  CreateSeatPayload,
 } from "@/types/destinations.types";
 
 const AIRPORTS = "/admin/airports";
@@ -48,6 +49,21 @@ export const updateAircraft = async (id: number, payload: UpdateAircraftPayload)
 
 export const deleteAircraft = async (id: number): Promise<void> => {
   await axiosClient.delete(`${AIRCRAFT}/${id}`);
+};
+
+// ── Seat Management ──────────────────────────────────────────────────────────
+export const getAircraftSeats = async (aircraftId: number): Promise<Seat[]> => {
+  const response = await axiosClient.get(`${AIRCRAFT}/${aircraftId}/seats`);
+  return response.data;
+};
+
+export const addAircraftSeats = async (aircraftId: number, payload: CreateSeatPayload[]): Promise<Seat[]> => {
+  const response = await axiosClient.post(`${AIRCRAFT}/${aircraftId}/seats`, payload);
+  return response.data;
+};
+
+export const deleteAircraftSeat = async (seatId: number): Promise<void> => {
+  await axiosClient.delete(`${AIRCRAFT}/seats/${seatId}`);
 };
 
 // ── Seat Classes ──────────────────────────────────────────────────────────────

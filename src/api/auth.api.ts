@@ -29,9 +29,41 @@ export async function register(payload: Omit<RegisterFormValues, "confirmPasswor
   }
 }
 
+/**
+ * Special registration for Admins
+ * POST /auth/admin/register
+ */
+export async function registerAdmin(payload: Omit<RegisterFormValues, "confirmPassword">): Promise<User> {
+  try {
+    const res = await axiosClient.post<User>("/auth/admin/register", payload);
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Get current user profile
+ * GET /users/me (As per API spec)
+ */
 export async function getProfile(): Promise<User> {
   try {
-    const res = await axiosClient.get<User>("/auth/me");
+    const res = await axiosClient.get<User>("/users/me");
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Update current user profile
+ * PUT /users/me
+ */
+export async function updateProfile(payload: Partial<User>): Promise<User> {
+  try {
+    const res = await axiosClient.put<User>("/users/me", payload);
     return res.data;
   } catch (err) {
     handleApiError(err);

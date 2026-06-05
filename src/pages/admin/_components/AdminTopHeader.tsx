@@ -27,14 +27,14 @@ const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
       </div>
 
       <div className="flex items-center gap-5">
-        {/* Notifications */}
+        {/* Notifications 
         <button className="relative rounded-full p-2.5 text-slate-500 hover:bg-slate-100 transition-colors">
           <Bell size={22} />
           <span className="absolute right-2 top-2 flex size-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-white">
             <span className="sr-only">New notification</span>
           </span>
         </button>
-
+              */}
         {/* User Profile */}
         <div className="flex items-center gap-3 border-l border-slate-200 pl-5">
           <div className="hidden text-right lg:block">

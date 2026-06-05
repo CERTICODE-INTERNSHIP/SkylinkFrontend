@@ -183,7 +183,7 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Charts */}
-        <DashboardCharts />
+        <DashboardCharts bookings={dashboardData.bookings as any[]} />
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

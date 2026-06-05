@@ -8,176 +8,6 @@ import { getAllBookingsAdmin } from "@/api/bookings.api";
 import { ROUTES } from "@/constants/routes";
 import type { Booking } from "@/types";
 
-const MOCK_BOOKINGS: Booking[] = [
-  {
-    id: "ab1234",
-    pnr: "AB1234",
-    userId: "user-1",
-    flightId: "flight-1",
-    status: "confirmed",
-    totalPrice: 3150,
-    createdAt: "2026-03-15T10:22:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Maria", lastName: "Santos", seatNumber: "12A", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "PR 2191",
-      origin: "MNL",
-      destination: "CEB",
-      departureTime: "2026-04-12T08:00:00Z",
-      arrivalTime: "2026-04-12T09:20:00Z",
-      airline: "Philippine Airlines"
-    }
-  },
-  {
-    id: "cd5678",
-    pnr: "CD5678",
-    userId: "user-2",
-    flightId: "flight-2",
-    status: "confirmed",
-    totalPrice: 3150,
-    createdAt: "2026-03-15T11:05:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Juan", lastName: "dela Cruz", seatNumber: "14B", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "PR 2192",
-      origin: "CEB",
-      destination: "MNL",
-      departureTime: "2026-04-12T10:00:00Z",
-      arrivalTime: "2026-04-12T11:20:00Z",
-      airline: "Philippine Airlines"
-    }
-  },
-  {
-    id: "ef9012",
-    pnr: "EF9012",
-    userId: "user-3",
-    flightId: "flight-3",
-    status: "boarded",
-    totalPrice: 2250,
-    createdAt: "2026-03-15T12:00:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Ana", lastName: "Reyes", seatNumber: "18A", mealPreference: "vegetarian" }
-    ],
-    flight: {
-      flightNumber: "5J 800",
-      origin: "MNL",
-      destination: "DVO",
-      departureTime: "2026-04-12T13:00:00Z",
-      arrivalTime: "2026-04-12T14:45:00Z",
-      airline: "Cebu Pacific"
-    }
-  },
-  {
-    id: "gh3456",
-    pnr: "GH3456",
-    userId: "user-4",
-    flightId: "flight-4",
-    status: "confirmed",
-    totalPrice: 6200,
-    createdAt: "2026-03-15T13:30:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Carlos", lastName: "Garcia", seatNumber: "08C", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "2P 301",
-      origin: "MNL",
-      destination: "KUL",
-      departureTime: "2026-04-12T15:00:00Z",
-      arrivalTime: "2026-04-12T19:00:00Z",
-      airline: "AirAsia"
-    }
-  },
-  {
-    id: "ij7890",
-    pnr: "IJ7890",
-    userId: "user-5",
-    flightId: "flight-5",
-    status: "confirmed",
-    totalPrice: 24750,
-    createdAt: "2026-03-15T14:15:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Luisa", lastName: "Fernandez", seatNumber: "02A", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "PR 428",
-      origin: "MNL",
-      destination: "NRT",
-      departureTime: "2026-04-12T06:40:00Z",
-      arrivalTime: "2026-04-12T12:15:00Z",
-      airline: "Philippine Airlines"
-    }
-  },
-  {
-    id: "kl1234",
-    pnr: "KL1234",
-    userId: "user-6",
-    flightId: "flight-6",
-    status: "completed",
-    totalPrice: 5400,
-    createdAt: "2026-03-14T09:40:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Roberto", lastName: "Bautista", seatNumber: "10D", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "SQ 915",
-      origin: "MNL",
-      destination: "SIN",
-      departureTime: "2026-04-11T07:20:00Z",
-      arrivalTime: "2026-04-11T10:45:00Z",
-      airline: "Singapore Airlines"
-    }
-  },
-  {
-    id: "mn5678",
-    pnr: "MN5678",
-    userId: "user-7",
-    flightId: "flight-7",
-    status: "cancelled",
-    totalPrice: 6980,
-    createdAt: "2026-03-14T15:10:00Z",
-    paymentStatus: "refunded",
-    passengers: [
-      { firstName: "Isabel", lastName: "Ramos", seatNumber: "15C", mealPreference: "vegetarian" }
-    ],
-    flight: {
-      flightNumber: "CX 906",
-      origin: "MNL",
-      destination: "HKG",
-      departureTime: "2026-04-11T10:55:00Z",
-      arrivalTime: "2026-04-11T13:10:00Z",
-      airline: "Cathay Pacific"
-    }
-  },
-  {
-    id: "op9012",
-    pnr: "OP9012",
-    userId: "user-8",
-    flightId: "flight-8",
-    status: "confirmed",
-    totalPrice: 61875,
-    createdAt: "2026-03-13T11:20:00Z",
-    paymentStatus: "captured",
-    passengers: [
-      { firstName: "Miguel", lastName: "Torres", seatNumber: "03B", mealPreference: "standard" }
-    ],
-    flight: {
-      flightNumber: "PR 102",
-      origin: "MNL",
-      destination: "LAX",
-      departureTime: "2026-04-13T21:00:00Z",
-      arrivalTime: "2026-04-14T19:30:00Z",
-      airline: "Philippine Airlines"
-    }
-  }
-];
 
 const getPaymentMethod = (pnr?: string) => {
   if (pnr === "CD5678" || pnr === "KL1234") return "GCash";
@@ -206,45 +36,51 @@ const AdminBookingsPage = () => {
         const data = await getAllBookingsAdmin();
         if (data && data.length > 0) {
           const normalized = data.map((b: any) => ({
-            ...b,
-            pnr: b.pnr || b.id.toUpperCase().slice(0, 6),
-            userId: b.userId || b.user_id,
-            flightId: b.flightId || b.flight_id,
-            status: b.status || "confirmed",
-            totalPrice: b.totalPrice !== undefined ? b.totalPrice : (b.total_price !== undefined ? b.total_price : 0),
-            createdAt: b.createdAt || b.booked_at || b.created_at || new Date().toISOString(),
-            paymentStatus: b.paymentStatus || b.payment_status || (b.status === "cancelled" ? "refunded" : "captured"),
+            id: String(b.id),
+            pnr: b.id.toString().toUpperCase().slice(0, 8),
+            userId: String(b.user_id ?? b.userId ?? ""),
+            flightId: String(b.flight?.id ?? b.flight_id ?? ""),
+            status: b.status ?? "confirmed",
+            totalPrice: b.total_price ?? b.totalPrice ?? 0,
+            createdAt: b.booked_at ?? b.createdAt ?? new Date().toISOString(),
+            updatedAt: b.updated_at ?? b.updatedAt ?? b.booked_at ?? new Date().toISOString(),
+            paymentStatus: b.status === "cancelled" ? "refunded" : "captured",
             flight: b.flight ? {
-              flightNumber: b.flight.flightNumber || b.flight.flight_number || "FLIGHT",
-              origin: b.flight.origin || "MNL",
-              destination: b.flight.destination || "CEB",
-              departureTime: b.flight.departureTime || b.flight.departure_time || new Date().toISOString(),
-              arrivalTime: b.flight.arrivalTime || b.flight.arrival_time || new Date().toISOString(),
-              airline: b.flight.airline || "Commercial Carrier"
+              flightNumber: b.flight.flight_number ?? b.flight.flightNumber ?? "—",
+              origin: b.flight.origin_airport?.iata_code ?? b.flight.origin ?? "—",
+              destination: b.flight.destination_airport?.iata_code ?? b.flight.destination ?? "—",
+              departureTime: b.flight.departure_time ?? b.flight.departureTime ?? b.booked_at,
+              arrivalTime: b.flight.arrival_time ?? b.flight.arrivalTime ?? b.booked_at,
+              airline: b.flight.origin_airport?.name ?? "—",
             } : {
-              flightNumber: "FLIGHT",
-              origin: "MNL",
-              destination: "CEB",
-              departureTime: b.createdAt || b.booked_at || new Date().toISOString(),
-              arrivalTime: b.createdAt || b.booked_at || new Date().toISOString(),
-              airline: "Commercial Carrier"
+              flightNumber: "—",
+              origin: "—",
+              destination: "—",
+              departureTime: b.booked_at ?? new Date().toISOString(),
+              arrivalTime: b.booked_at ?? new Date().toISOString(),
+              airline: "—",
             },
-            passengers: b.passengers && b.passengers.length > 0 ? b.passengers : [
-              {
-                firstName: "Passenger",
-                lastName: "Details",
-                seatNumber: b.seatNumber || b.seat_number || "—",
-                mealPreference: "standard"
-              }
-            ]
+            passengers: Array.isArray(b.passengers) && b.passengers.length > 0
+              ? b.passengers.map((p: any) => ({
+                  firstName: p.first_name ?? p.firstName ?? "—",
+                  lastName: p.last_name ?? p.lastName ?? "—",
+                  seatNumber: b.seat_number ?? b.seatNumber ?? "—",
+                  mealPreference: "standard",
+                }))
+              : [{
+                  firstName: "—",
+                  lastName: "—",
+                  seatNumber: b.seat_number ?? "—",
+                  mealPreference: "standard",
+                }],
           }));
-          setBookings(normalized);
+          setBookings(normalized as Booking[]);
         } else {
-          setBookings(MOCK_BOOKINGS);
+          setBookings([]);
         }
       } catch (err) {
-        console.error("Failed to load bookings from API, using mock bookings:", err);
-        setBookings(MOCK_BOOKINGS);
+        console.error("Failed to load bookings from API:", err);
+        setBookings([]);
       } finally {
         setIsLoading(false);
       }

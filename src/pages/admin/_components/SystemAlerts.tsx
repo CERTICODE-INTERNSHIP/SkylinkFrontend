@@ -1,11 +1,19 @@
 import { cn } from "@/utils/cn";
 import { AlertTriangle, CreditCard, RefreshCcw } from "lucide-react";
 
-const SystemAlerts = () => {
+interface SystemAlertsProps {
+  flights: import("@/types").Flight[];
+  bookings: any[];
+}
+
+const SystemAlerts = ({ flights, bookings }: SystemAlertsProps) => {
+  const lowSeatFlights = flights.filter((f) => (f.seatsAvailable ?? 0) < 10).length;
+  const pendingRefunds = bookings.filter((b) => b.status === "pending_cancellation").length;
+
   const alerts = [
     {
       title: "Low Seats",
-      description: "3 flights with fewer than 10 seats available",
+      description: `${lowSeatFlights} flight${lowSeatFlights !== 1 ? "s" : ""} with fewer than 10 seats available`,
       icon: AlertTriangle,
       color: "bg-amber-50",
       iconColor: "text-amber-600",
@@ -13,7 +21,7 @@ const SystemAlerts = () => {
     },
     {
       title: "Failed Payments",
-      description: "2 failed payment transactions pending review",
+      description: "Payment gateway coming soon", 
       icon: CreditCard,
       color: "bg-rose-50",
       iconColor: "text-rose-600",
@@ -21,7 +29,7 @@ const SystemAlerts = () => {
     },
     {
       title: "Pending Refund",
-      description: "1 refund request pending approval",
+      description: `${pendingRefunds} refund request${pendingRefunds !== 1 ? "s" : ""} pending approval`,
       icon: RefreshCcw,
       color: "bg-sky-50",
       iconColor: "text-sky-600",

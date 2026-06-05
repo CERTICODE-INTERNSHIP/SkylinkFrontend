@@ -211,7 +211,7 @@ const AdminDashboardPage = () => {
 
           {/* System Alerts */}
           <div>
-            <SystemAlerts />
+            <SystemAlerts flights={dashboardData.flights} bookings={dashboardData.bookings as any[]} />
           </div>
         </div>
       </div>

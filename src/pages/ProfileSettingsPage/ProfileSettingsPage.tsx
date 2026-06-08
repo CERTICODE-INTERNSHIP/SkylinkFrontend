@@ -13,6 +13,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { updateMe, changePassword } from "@/api/users.api";
+import axiosClient from "@/api/axiosClient";
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -68,11 +70,12 @@ const borderError = "border-danger-40";
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ProfileSettingsPage = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
 
   // Profile form
   const [profileSuccess, setProfileSuccess] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const {
     register: profileReg,
     handleSubmit: handleProfileSubmit,
@@ -89,6 +92,7 @@ const ProfileSettingsPage = () => {
 
   // Security form
   const [securitySuccess, setSecuritySuccess] = useState(false);
+  const [securityError, setSecurityError] = useState<string | null>(null);
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
@@ -105,23 +109,44 @@ const ProfileSettingsPage = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
 
-  const onProfileSave = async (_data: ProfileFormValues) => {
-    // TODO: wire to API
-    await new Promise((r) => setTimeout(r, 600));
-    setProfileSuccess(true);
-    setTimeout(() => setProfileSuccess(false), 3000);
+  const onProfileSave = async (data: ProfileFormValues) => {
+    try {
+      await updateMe({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_number: data.phone_number ?? null,
+      });
+      await refreshProfile();
+      setProfileSuccess(true);
+      setTimeout(() => setProfileSuccess(false), 3000);
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Failed to update profile.";
+      setProfileError(msg);
+      setTimeout(() => setProfileError(null), 4000);
+    }
   };
 
-  const onSecuritySave = async (_data: SecurityFormValues) => {
-    // TODO: wire to API
-    await new Promise((r) => setTimeout(r, 600));
-    setSecuritySuccess(true);
-    resetSecurity();
-    setTimeout(() => setSecuritySuccess(false), 3000);
+  const onSecuritySave = async (data: SecurityFormValues) => {
+    try {
+      await changePassword(data.current_password, data.new_password);
+      setSecuritySuccess(true);
+      resetSecurity();
+      setTimeout(() => setSecuritySuccess(false), 3000);
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Failed to update password.";
+      setSecurityError(msg);
+      setTimeout(() => setSecurityError(null), 4000);
+    }
   };
 
-  const onDeleteAccount = () => {
-    // TODO: wire to API
+  const onDeleteAccount = async () => {
+    try {
+      await axiosClient.delete("/users/me");
+      signOut();
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Failed to delete account.";
+      setProfileError(msg);
+    }
   };
 
   return (
@@ -167,6 +192,13 @@ const ProfileSettingsPage = () => {
                   <form onSubmit={handleProfileSubmit(onProfileSave)} noValidate>
                     <h2 className="text-base font-bold text-slate-800 mb-6">Profile Information</h2>
 
+                    {profileError && (
+                      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-danger-20 bg-danger-5 px-4 py-3 text-sm font-medium text-danger-60">
+                        <AlertTriangle size={16} className="shrink-0" />
+                        {profileError}
+                      </div>
+                    )}
+                    
                     {profileSuccess && (
                       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-success-20 bg-success-5 px-4 py-3 text-sm font-medium text-success-60">
                         <CheckCircle2 size={16} className="shrink-0" />
@@ -276,6 +308,14 @@ const ProfileSettingsPage = () => {
               {activeTab === "security" && (
                 <form onSubmit={handleSecuritySubmit(onSecuritySave)} noValidate>
                   <h2 className="text-base font-bold text-slate-800 mb-6">Change Password</h2>
+
+
+                  {securityError && (
+                    <div className="mb-6 flex items-center gap-3 rounded-2xl border border-danger-20 bg-danger-5 px-4 py-3 text-sm font-medium text-danger-60">
+                      <AlertTriangle size={16} className="shrink-0" />
+                      {securityError}
+                    </div>
+                  )}
 
                   {securitySuccess && (
                     <div className="mb-6 flex items-center gap-3 rounded-2xl border border-success-20 bg-success-5 px-4 py-3 text-sm font-medium text-success-60">

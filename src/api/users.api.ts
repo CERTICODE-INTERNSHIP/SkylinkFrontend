@@ -11,6 +11,44 @@ export interface UserListItem extends User {
 }
 
 /**
+ * User: Get own profile
+ * GET /api/v1/users/me
+ */
+export async function getMe(): Promise<User> {
+  try {
+    const res = await axiosClient.get("/users/me");
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+/**
+ * User: Update own profile
+ * PUT /api/v1/users/me
+ */
+export async function updateMe(payload: { first_name?: string; last_name?: string; phone_number?: string | null }): Promise<User> {
+  try {
+    const res = await axiosClient.put("/users/me", payload);
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+/**
+ * User: Change password
+ * PUT /api/v1/users/me/password
+ */
+export async function changePassword(current_password: string, new_password: string): Promise<void> {
+  try {
+    await axiosClient.put("/users/me/password", { current_password, new_password });
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+/**
  * Admin: Get all users
  * GET /api/v1/users
  */

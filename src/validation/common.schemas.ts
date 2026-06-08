@@ -6,7 +6,10 @@ export const requiredString = (label: string) =>
 export const phoneSchema = z
   .string()
   .trim()
-  .regex(/^\+?[0-9]{10,15}$/, "Invalid phone number format");
+  .refine(
+    (val) => val === "" || /^\+?[0-9]{10,15}$/.test(val),
+    "Invalid phone number format"
+  );
 
 export const dateStringSchema = z
   .string()

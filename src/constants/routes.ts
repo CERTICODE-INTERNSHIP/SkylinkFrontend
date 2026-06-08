@@ -12,6 +12,7 @@ export const ROUTES = {
   MANAGE_BOOKING_CANCEL: "/manage/:id/cancel",
   MANAGE_BOOKING_CANCELED: "/manage/:id/canceled",
   EXPLORE_DESTINATION: "/explore/destination",
+  EXPLORE_DESTINATION_DETAIL: "/explore/destination/:iata_code",
   EXPLORE_PROMOS: "/explore/promos",
   EXPLORE_PROMO_DETAIL: "/explore/promos/deal",
   LOGIN: "/login",

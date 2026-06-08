@@ -77,6 +77,10 @@ const AppContent = () => {
             path={ROUTES.EXPLORE_DESTINATION}
             element={<DestinationPage />}
           />
+          <Route
+            path={ROUTES.EXPLORE_DESTINATION_DETAIL}
+            element={<DestinationPage />}
+          />
           <Route path={ROUTES.EXPLORE_PROMOS} element={<PromosPage />} />
           <Route path={ROUTES.EXPLORE_PROMO_DETAIL} element={<DeaPage />} />
           <Route path={ROUTES.FLIGHT_DETAIL} element={<ResultsBookingPage />} />

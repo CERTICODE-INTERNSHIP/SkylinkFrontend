@@ -34,6 +34,7 @@ export interface Flight {
   price: number;
   airline?: string;
   seatsAvailable?: number;
+  hasLowSeats?: boolean;
   totalSeats?: number;
   status?: FlightStatus;
   cabinClass?: CabinClass;

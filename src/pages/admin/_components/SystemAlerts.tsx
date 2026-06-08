@@ -7,7 +7,7 @@ interface SystemAlertsProps {
 }
 
 const SystemAlerts = ({ flights, bookings }: SystemAlertsProps) => {
-  const lowSeatFlights = flights.filter((f) => (f.seatsAvailable ?? 0) < 10).length;
+  const lowSeatFlights = flights.filter((f) => f.hasLowSeats).length;
   const pendingRefunds = bookings.filter((b) => b.status === "pending_cancellation").length;
 
   const alerts = [

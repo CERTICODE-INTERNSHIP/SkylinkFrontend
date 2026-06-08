@@ -28,6 +28,7 @@ const mapBackendFlight = (f: any): Flight => {
     status: f.status,
     price: extractedPrice || f.price || f.base_price || 0,
     seatsAvailable: f.seat_pricing?.reduce((acc: number, p: any) => acc + (p.available_seats || 0), 0) || f.seatsAvailable,
+    hasLowSeats: f.seat_pricing?.some((p: any) => p.available_seats < 10) ?? false,
     totalSeats: f.seat_pricing?.reduce((acc: number, p: any) => acc + (p.total_seats || 0), 0) || f.totalSeats,
     airline: f.airline || "SkyLink",
     cabinClass: f.cabin_class || "economy",

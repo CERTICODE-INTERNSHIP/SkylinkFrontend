@@ -46,9 +46,22 @@ const DestinationPage = () => {
 
   const flightLoader = useCallback(async (): Promise<FlightCard[]> => {
     if (!iata_code) return [];
-    const res = await searchFlights({ destination: iata_code.toUpperCase() });
-    const items = Array.isArray(res) ? res : (res as any)?.items ?? [];
-    return items.map(mapFlightToCard);
+    const flights = await searchFlights({ destination: iata_code.toUpperCase() });
+    return flights.map((flight) => {
+      const dep = new Date(flight.departureTime);
+      const arr = new Date(flight.arrivalTime);
+      const diffMs = arr.getTime() - dep.getTime();
+      const diffHrs = Math.floor(diffMs / 3600000);
+      const diffMins = Math.round((diffMs % 3600000) / 60000);
+      return {
+        id: flight.flightNumber,
+        flightId: flight.id,
+        time: `${dep.toUTCString().slice(17, 22)} - ${arr.toUTCString().slice(17, 22)}`,
+        duration: `${diffHrs}h ${diffMins}m`,
+        price: `₱${Math.round(flight.price).toLocaleString("en-US")}`,
+        cabin: "Economy",
+      };
+    });
   }, [iata_code]);
 
   const { data: airport, isLoading: airportLoading } = useAsyncValue(airportLoader);
@@ -144,7 +157,7 @@ const DestinationPage = () => {
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-slate-900">Next Available Flights</h2>
-                <Link to={ROUTES.SEARCH_RESULTS} className="text-xs font-semibold text-[#5D7FA7] hover:text-[#4E6B8D]">
+                <Link to={`${ROUTES.SEARCH_RESULTS}?from=MNL&to=${airport.iata_code}`} className="text-xs font-semibold text-[#5D7FA7] hover:text-[#4E6B8D]">
                   See all flights
                 </Link>
               </div>
@@ -215,14 +228,14 @@ const DestinationPage = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-[#F9F4EE] p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Lowest fare from MNL
+                Lowest fare to {airport.city}
               </p>
               <p className="mt-2 text-2xl font-semibold text-[#5D7FA7]">
                 {availableFlights[0]?.price ?? "—"}
               </p>
               <p className="mt-1 text-xs text-slate-500">One-way · Economy</p>
               <Link
-                to={ROUTES.BOOK}
+                to={`${ROUTES.SEARCH_RESULTS}?from=MNL&to=${airport.iata_code}`}
                 className="mt-4 block w-full rounded-lg bg-[#5D7FA7] px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-[#4E6B8D]"
               >
                 Book Now

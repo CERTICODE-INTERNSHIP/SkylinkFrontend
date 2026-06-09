@@ -1,6 +1,6 @@
 import axiosClient from "./axiosClient";
 import { handleApiError } from "./api.helpers";
-import type { ExportRequest, ReportResult, ReportQuery, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList } from "@/types";
+import type { ExportRequest, ReportResult, ReportQuery, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList, RevenueForecast, DemandForecast, CancellationRisk, RevenueAnomalies, PricingSuggestions } from "@/types";
 
 /**
  * Admin: Get Booking Report
@@ -70,6 +70,78 @@ export async function getActivityLogs(params?: {
     return res.data as ActivityLogList;
   } catch (err) {
     handleApiError(err);
+  }
+}
+
+/**
+ * Admin: ML — Revenue Forecast
+ * GET /api/v1/admin/ml/revenue-forecast
+ */
+export async function getRevenueForecast(monthsAhead: number = 6): Promise<RevenueForecast> {
+  try {
+    const res = await axiosClient.get("/admin/ml/revenue-forecast", {
+      params: { months_ahead: monthsAhead },
+    });
+    return res.data as RevenueForecast;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Admin: ML — Demand Forecast
+ * GET /api/v1/admin/ml/demand-forecast
+ */
+export async function getDemandForecast(): Promise<DemandForecast> {
+  try {
+    const res = await axiosClient.get("/admin/ml/demand-forecast");
+    return res.data as DemandForecast;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Admin: ML — Cancellation Risk
+ * GET /api/v1/admin/ml/cancellation-risk/{booking_id}
+ */
+export async function getCancellationRisk(bookingId: string): Promise<CancellationRisk> {
+  try {
+    const res = await axiosClient.get(`/admin/ml/cancellation-risk/${bookingId}`);
+    return res.data as CancellationRisk;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Admin: ML — Revenue Anomalies
+ * GET /api/v1/admin/ml/revenue-anomalies
+ */
+export async function getRevenueAnomalies(): Promise<RevenueAnomalies> {
+  try {
+    const res = await axiosClient.get("/admin/ml/revenue-anomalies");
+    return res.data as RevenueAnomalies;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
+ * Admin: ML — Pricing Suggestions
+ * GET /api/v1/admin/ml/pricing-suggestion/{flight_id}
+ */
+export async function getPricingSuggestions(flightId: string): Promise<PricingSuggestions> {
+  try {
+    const res = await axiosClient.get(`/admin/ml/pricing-suggestion/${flightId}`);
+    return res.data as PricingSuggestions;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
   }
 }
 

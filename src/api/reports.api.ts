@@ -24,6 +24,16 @@ export async function getKpiSummary() {
   return res.data;
 }
 
+export async function getRevenueByRoute(): Promise<{ route: string; revenue: number }[]> {
+  try {
+    const res = await axiosClient.get("/admin/kpi/revenue-by-route");
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+    return [];
+  }
+}
+
 /**
  * Admin: Get Route Booking Report
  * GET /api/v1/admin/reports/routes

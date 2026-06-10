@@ -105,7 +105,7 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
         : undefined;
       return {
         period: `${m.month} ${m.year}`,
-        value: m.revenue / 100,
+        value: m.revenue,
         change: changeValue !== undefined ? `${changeValue > 0 ? "+" : ""}${changeValue}%` : "—",
         changeValue,
       };
@@ -140,7 +140,7 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
 
   const forecastChartPoints = useMemo(() => {
     if (!showForecast || forecastData.length === 0 || chartPoints.length === 0) return [];
-    const allData = [...reportData, ...forecastData.map(f => ({ period: `${f.month} ${f.year}`, value: f.revenue / 100 }))];
+    const allData = [...reportData, ...forecastData.map(f => ({ period: `${f.month} ${f.year}`, value: f.revenue }))];
     const count = allData.length;
     const xStart = 120, xEnd = 660;
     const maxVal = Math.max(...allData.map(d => typeof d.value === "number" ? d.value : 0));
@@ -148,7 +148,7 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
     return forecastData.map((f, i) => {
       const idx = reportData.length + i;
       const x = count === 1 ? (xStart + xEnd) / 2 : xStart + (idx / (count - 1)) * (xEnd - xStart);
-      const val = f.revenue / 100;
+      const val = f.revenue;
       return { x, y: 260 - (val / maxY) * 200, value: val, period: `${f.month} ${f.year}` };
     });
   }, [showForecast, forecastData, chartPoints, reportData]);

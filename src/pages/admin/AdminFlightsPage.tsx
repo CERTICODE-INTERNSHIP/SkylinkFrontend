@@ -323,9 +323,9 @@ const AdminFlightsPage = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-slate-500">
-                      <span>Current: <span className="font-bold text-slate-700">₱{(s.current_price / 100).toLocaleString()}</span></span>
+                      <span>Current: <span className="font-bold text-slate-700">₱{Number(s.current_price).toLocaleString()}</span></span>
                       <span>→</span>
-                      <span>Suggested: <span className="font-bold text-[#496B92]">₱{(s.suggested_price / 100).toLocaleString()}</span></span>
+                      <span>Suggested: <span className="font-bold text-[#496B92]">₱{Number(s.suggested_price).toLocaleString()}</span></span>
                     </div>
                     <div className="flex gap-3 text-[11px] text-slate-400">
                       <span>Occupancy: {s.occupancy_rate}%</span>

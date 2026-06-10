@@ -11,7 +11,7 @@ const mapBackendFlight = (f: any): Flight => {
       p.seat_class?.name?.toLowerCase() === "economy" || p.seat_class_id === 1
     );
     // Use price from economyPricing if found, otherwise take from the first element
-    extractedPrice = (economyPricing?.price || f.seat_pricing[0].price) / 100;
+    extractedPrice = economyPricing?.price || f.seat_pricing[0].price;
   }
 
   return {
@@ -68,7 +68,7 @@ const mapFrontendToBackend = async (payload: any) => {
     image_url: payload.imageUrl,
     seat_pricing: payload.seat_pricing.map((p: any) => ({
       seat_class_id: p.seat_class_id,
-      price: Math.round(Number(p.price) * 100) // Price is in cents in backend
+      price: Number(p.price)
     }))
   };
 

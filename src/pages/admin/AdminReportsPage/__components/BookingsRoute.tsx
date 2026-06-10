@@ -75,7 +75,7 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
     routes.map(r => ({
       route: r.route,
       bookings: r.bookings,
-      revenue: `₱${(r.revenue / 100).toLocaleString()}`,
+      revenue: `₱${Number(r.revenue).toLocaleString()}`,
     })),
     [routes]
   );

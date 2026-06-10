@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { cn } from "@/utils/cn";
-
+import { getRevenueByRoute } from "@/api/reports.api";
 interface RawBooking {
   id: string;
   total_price: number;
@@ -17,6 +17,11 @@ interface Props {
 
 const DashboardCharts = ({ bookings }: Props) => {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [revenueByRoute, setRevenueByRoute] = useState<{ route: string; revenue: number }[]>([]);
+
+  useEffect(() => {
+    getRevenueByRoute().then(setRevenueByRoute);
+  }, []);
 
   // --- Bookings Over Time (last 30 days, grouped by date) ---
   const bookingsByDate = useMemo(() => {
@@ -80,22 +85,6 @@ const DashboardCharts = ({ bookings }: Props) => {
     });
   }, [bookingsByDate]);
 
-  // --- Revenue by Route ---
-  const revenueByRoute = useMemo(() => {
-    const map: Record<string, number> = {};
-    bookings.forEach((b) => {
-      const origin = (b.flight as any)?.origin_airport?.iata_code; 
-      const dest = (b.flight as any)?.destination_airport?.iata_code; 
-      if (!origin || !dest) return;
-      const key = `${origin} → ${dest}`;
-      map[key] = (map[key] ?? 0) + ((b as any).total_price ?? (b as any).totalPrice ?? 0);
-    });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([route, revenue]) => ({ route, revenue }));
-  }, [bookings]);
-
   const maxRevenue = useMemo(() =>
     Math.max(...revenueByRoute.map((r) => r.revenue), 1),
     [revenueByRoute]
@@ -111,7 +100,12 @@ const DashboardCharts = ({ bookings }: Props) => {
       {/* Bookings Over Time */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-slate-900 leading-none">Bookings Over Time</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-slate-900 leading-none">Bookings Over Time</h3>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+              {bookingsByDate.reduce((sum, d) => sum + d.count, 0)} total
+            </span>
+          </div>
           <p className="mt-1 text-sm text-slate-500 font-medium">Last 30 days</p>
         </div>
         <div className="relative h-64 w-full select-none">
@@ -212,7 +206,7 @@ const DashboardCharts = ({ bookings }: Props) => {
               <div key={r.route} className="space-y-1">
                 <div className="flex justify-between text-xs font-bold text-slate-600">
                   <span>{r.route}</span>
-                  <span>₱{(r.revenue / 100).toLocaleString("en-US")}</span>
+                  <span>₱{Number(r.revenue).toLocaleString("en-US")}</span>
                 </div>
                 <div className="h-4 w-full rounded-full bg-slate-50">
                   <div

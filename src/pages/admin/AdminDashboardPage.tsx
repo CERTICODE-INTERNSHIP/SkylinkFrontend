@@ -51,7 +51,7 @@ function mapBookingToRecentBooking(booking: any): RecentBooking {
     route,
     date,
     status: booking.status,
-    amount: `₱${((booking.total_price ?? 0) / 100).toLocaleString("en-US")}`,
+    amount: `₱${Number(booking.total_price ?? 0).toLocaleString("en-US")}`,
   };
 }
 
@@ -176,7 +176,7 @@ const AdminDashboardPage = () => {
           />
           <KPICard
             label="Revenue This Month (₱)"
-            value={`₱${dashboardData.kpi.total_revenue.toLocaleString("en-US")}`}
+            value={`₱${Number(dashboardData.kpi.total_revenue).toLocaleString("en-US")}`}
             change={formatChange(dashboardData.kpi.revenue_change).value}
             trend={formatChange(dashboardData.kpi.revenue_change).trend}
             icon={Banknote}

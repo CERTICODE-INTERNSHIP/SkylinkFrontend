@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { useFlights } from "@/hooks/useFlights";
@@ -18,7 +19,9 @@ const AdminFlightsPage = () => {
   const { data: flights, isLoading, refetch } = useFlights({ pageSize: 100 });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortBy, setSortBy] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sortBy, setSortBy] = useState(() => searchParams.get("sort") ?? "");
+  const isLowSeatsView = searchParams.get("sort") === "seats";
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [flightToDelete, setFlightToDelete] = useState<Flight | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,8 +41,9 @@ const AdminFlightsPage = () => {
         flight.destination?.toLowerCase().includes(query);
       
       const matchesStatus = statusFilter === "" || flight.status === statusFilter;
+      const matchesLowSeats = !isLowSeatsView || flight.hasLowSeats;
       
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesLowSeats;
     }).sort((a, b) => {
       if (sortBy === "departure") {
         return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
@@ -48,7 +52,7 @@ const AdminFlightsPage = () => {
         return (a.price || 0) - (b.price || 0);
       }
       if (sortBy === "seats") {
-        return (b.seatsAvailable || 0) - (a.seatsAvailable || 0);
+        return (a.seatsAvailable || 0) - (b.seatsAvailable || 0);
       }
       return 0;
     });
@@ -201,6 +205,29 @@ const AdminFlightsPage = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Low Seats Banner */}
+        {isLowSeatsView && (() => {
+          const lowSeatFlights = (flights ?? []).filter((f) => f.hasLowSeats);
+          return lowSeatFlights.length > 0 ? (
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+              <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={18} />
+              <div>
+                <p className="text-sm font-bold text-amber-900">
+                  {lowSeatFlights.length} flight{lowSeatFlights.length !== 1 ? "s" : ""} nearly full — under 10 seats remaining
+                </p>
+                <p className="text-xs text-amber-700 mt-0.5 font-medium">
+                  These flights are close to selling out. Consider adjusting pricing or opening additional capacity.
+                </p>
+              </div>
+              <button
+                onClick={() => setSearchParams({})}
+                className="ml-auto text-xs font-bold text-amber-700 hover:underline cursor-pointer shrink-0"
+              >
+                Clear filter
+              </button>
+            </div>
+          ) : null;
+        })()}
         {/* Header Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

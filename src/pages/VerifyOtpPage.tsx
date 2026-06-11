@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { verifyOtp, forgotPassword } from "@/api/auth.api";
-import { Mail, ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
+import { ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
 
 const VerifyOtpPage = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const VerifyOtpPage = () => {
   }, [email, navigate]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: any;
     if (timer > 0 && !canResend) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
@@ -37,7 +37,7 @@ const VerifyOtpPage = () => {
   }, [timer, canResend]);
 
   const handleChange = (element: HTMLInputElement, index: number) => {
-    if (isNaN(Number(element.value))) return false;
+    if (isNaN(Number(element.value))) return;
 
     setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
 
@@ -139,7 +139,9 @@ const VerifyOtpPage = () => {
                   key={index}
                   type="text"
                   maxLength={1}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   value={data}
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}

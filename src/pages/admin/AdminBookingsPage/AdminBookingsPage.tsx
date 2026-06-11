@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Eye, Download } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
-import { getCancellationRisk } from "@/api/reports.api";
-import type { CancellationRisk } from "@/types";
 import { ROUTES } from "@/constants/routes";
 import type { Booking } from "@/types";
 
@@ -17,110 +16,67 @@ const getPaymentMethod = (booking?: any) => {
 
 const AdminBookingsPage = () => {
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [totalBookings, setTotalBookings] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  // const [paymentFilter, setPaymentFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, dateFilter]); // removed paymentFilter
   const itemsPerPage = 8;
-  const [riskScores, setRiskScores] = useState<Record<string, CancellationRisk>>({});
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const params: Parameters<typeof getAllBookingsAdmin>[0] = {
-          page: currentPage,
-          size: itemsPerPage,
-        };
-        if (statusFilter) params.status = statusFilter;
-        if (searchQuery) params.search = searchQuery;
-        if (dateFilter) params.departure_date = dateFilter;
-        const result = await getAllBookingsAdmin(params);
-        const data = result?.items ?? [];
-        setTotalBookings(result?.total ?? 0);
-        if (data && data.length > 0) {
-          const normalized = data.map((b: any) => ({
-            id: String(b.id),
-            pnr: b.id.toString().toUpperCase().slice(0, 8),
-            userId: String(b.user_id ?? b.userId ?? ""),
-            flightId: String(b.flight?.id ?? b.flight_id ?? ""),
-            status: b.status ?? "confirmed",
-            totalPrice: b.total_price ?? b.totalPrice ?? 0,
-            createdAt: b.booked_at ?? b.createdAt ?? new Date().toISOString(),
-            updatedAt: b.updated_at ?? b.updatedAt ?? b.booked_at ?? new Date().toISOString(),
-            paymentStatus: b.status === "cancelled" ? "refunded" : "captured",
-            flight: b.flight ? {
-              flightNumber: b.flight.flight_number ?? b.flight.flightNumber ?? "—",
-              origin: b.flight.origin_airport?.iata_code ?? b.flight.origin ?? "—",
-              destination: b.flight.destination_airport?.iata_code ?? b.flight.destination ?? "—",
-              departureTime: b.flight.departure_time ?? b.flight.departureTime ?? b.booked_at,
-              arrivalTime: b.flight.arrival_time ?? b.flight.arrivalTime ?? b.booked_at,
-              airline: b.flight.origin_airport?.name ?? "—",
-            } : {
-              flightNumber: "—",
-              origin: "—",
-              destination: "—",
-              departureTime: b.booked_at ?? new Date().toISOString(),
-              arrivalTime: b.booked_at ?? new Date().toISOString(),
-              airline: "—",
-            },
-            passengers: Array.isArray(b.passengers) && b.passengers.length > 0
-              ? b.passengers.map((p: any) => ({
-                  firstName: p.first_name ?? p.firstName ?? "—",
-                  lastName: p.last_name ?? p.lastName ?? "—",
-                  seatNumber: b.seat_number ?? b.seatNumber ?? "—",
-                  mealPreference: "standard",
-                }))
-              : [],
-          }));
-          setBookings(normalized as Booking[]);
-        } else {
-          setBookings([]);
-        }
-      } catch (err) {
-        console.error("Failed to load bookings from API:", err);
-        setBookings([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBookings();
-  }, [currentPage, statusFilter, searchQuery, dateFilter]);
-  useEffect(() => {
-    if (bookings.length === 0) return;
-    const fetchRisks = async () => {
-      const results = await Promise.allSettled(
-        bookings
-          .filter((b) => b.status !== "cancelled")
-          .slice(0, 20)
-          .map((b) => getCancellationRisk(b.id))
-      );
-      const map: Record<string, CancellationRisk> = {};
-      results.forEach((r) => {
-        if (r.status === "fulfilled") {
-          map[r.value.booking_id] = r.value;
-        }
-      });
-      setRiskScores(map);
-    };
-    fetchRisks();
-  }, [bookings]);
+  const normalizeBooking = (b: any): Booking => ({
+    id: String(b.id),
+    pnr: b.id.toString().toUpperCase().slice(0, 8),
+    userId: String(b.user_id ?? b.userId ?? ""),
+    flightId: String(b.flight?.id ?? b.flight_id ?? ""),
+    status: b.status ?? "confirmed",
+    totalPrice: b.total_price ?? b.totalPrice ?? 0,
+    createdAt: b.booked_at ?? b.createdAt ?? new Date().toISOString(),
+    updatedAt: b.updated_at ?? b.updatedAt ?? b.booked_at ?? new Date().toISOString(),
+    paymentStatus: b.status === "cancelled" ? "refunded" : "captured",
+    flight: b.flight ? {
+      flightNumber: b.flight.flight_number ?? b.flight.flightNumber ?? "—",
+      origin: b.flight.origin_airport?.iata_code ?? b.flight.origin ?? "—",
+      destination: b.flight.destination_airport?.iata_code ?? b.flight.destination ?? "—",
+      departureTime: b.flight.departure_time ?? b.flight.departureTime ?? b.booked_at,
+      arrivalTime: b.flight.arrival_time ?? b.flight.arrivalTime ?? b.booked_at,
+      airline: b.flight.origin_airport?.name ?? "—",
+    } : {
+      flightNumber: "—", origin: "—", destination: "—",
+      departureTime: b.booked_at ?? new Date().toISOString(),
+      arrivalTime: b.booked_at ?? new Date().toISOString(),
+      airline: "—",
+    },
+    passengers: Array.isArray(b.passengers) && b.passengers.length > 0
+      ? b.passengers.map((p: any) => ({
+          firstName: p.first_name ?? p.firstName ?? "—",
+          lastName: p.last_name ?? p.lastName ?? "—",
+          seatNumber: b.seat_number ?? b.seatNumber ?? "—",
+          mealPreference: "standard",
+        }))
+      : [],
+  });
 
-  // Filter logic
-  const filteredBookings = bookings; // server-side pagination, no client filtering
-  const paginatedBookings = bookings; // already paginated from server
+  const { data: bookingsResult, isLoading } = useQuery({
+    queryKey: ["admin-bookings", currentPage, statusFilter, searchQuery, dateFilter],
+    queryFn: async () => {
+      const params: Parameters<typeof getAllBookingsAdmin>[0] = {
+        page: currentPage,
+        size: itemsPerPage,
+      };
+      if (statusFilter) params.status = statusFilter;
+      if (searchQuery) params.search = searchQuery;
+      if (dateFilter) params.departure_date = dateFilter;
+      const result = await getAllBookingsAdmin(params);
+      return {
+        bookings: (result?.items ?? []).map(normalizeBooking),
+        total: result?.total ?? 0,
+      };
+    },
+    staleTime: 30 * 1000,
+  });
+
+  const bookings = bookingsResult?.bookings ?? [];
+  const totalBookings = bookingsResult?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalBookings / itemsPerPage));
-
   // Columns definition
   const columns: TableColumn<Booking>[] = [
     {
@@ -176,36 +132,6 @@ const AdminBookingsPage = () => {
       cell: (row) => <span className="text-slate-600">{getPaymentMethod(row)}</span>,
     },
     {
-      key: "risk",
-      header: (
-        <div className="relative group/risk flex items-center gap-1 cursor-default">
-          <span>RISK</span>
-          <span className="text-[11px] text-slate-400 select-none">ⓘ</span>
-          <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/risk:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
-            <p className="text-[11px] text-slate-300 leading-relaxed">Estimates how likely each booking is to be cancelled, based on the route, seat class, ticket price, and how far in advance it was booked. High = needs attention.</p>
-          </div>
-        </div>
-      ),
-      cell: (row) => {
-        const risk = riskScores[row.id];
-        if (!risk || risk.risk_level === "unknown") {
-          return <span className="text-slate-300 text-xs font-medium">—</span>;
-        }
-        const cls =
-          risk.risk_level === "high"
-            ? "bg-rose-100 text-rose-700"
-            : risk.risk_level === "medium"
-              ? "bg-amber-100 text-amber-700"
-              : "bg-emerald-100 text-emerald-700";
-        return (
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${cls}`}>
-            {risk.risk_level}
-            {risk.risk_score !== null && ` · ${risk.risk_score}%`}
-          </span>
-        );
-      },
-    },
-    {
       key: "status",
       header: "STATUS",
       cell: (row) => <StatusBadge label={row.status} />,
@@ -227,7 +153,7 @@ const AdminBookingsPage = () => {
 
   const handleExportCSV = () => {
     const headers = ["PNR,Passenger,Route,Departure,Amount,Payment Method,Status\n"];
-    const rows = filteredBookings.map((b) => {
+    const rows = bookings.map((b) => {
       const p = b.passengers?.[0];
       const passengerName = p ? `${p.firstName} ${p.lastName}` : "—";
       const route = b.flight ? `${b.flight.origin} -> ${b.flight.destination}` : "—";
@@ -328,7 +254,7 @@ const AdminBookingsPage = () => {
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <DataTable
             columns={columns}
-            rows={paginatedBookings}
+            rows={bookings}
             rowKey={(r) => r.id}
             emptyState={
               <div className="py-20 text-center">
@@ -342,7 +268,7 @@ const AdminBookingsPage = () => {
           />
 
           {/* Pagination */}
-          {filteredBookings.length > 0 && (
+          {bookings.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
               <p className="text-sm font-medium text-slate-500">
                 Showing {Math.min(totalBookings, (currentPage - 1) * itemsPerPage + 1)}-
@@ -356,19 +282,33 @@ const AdminBookingsPage = () => {
                 >
                   &lt;
                 </button>
-                {Array.from({ length: totalPages }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentPage(idx + 1)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      currentPage === idx + 1
-                        ? "bg-[#496B92] text-white"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {idx + 1}
-                  </button>
-                ))}
+                {(() => {
+                  const pages: (number | "...")[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (currentPage > 3) pages.push("...");
+                    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                    if (currentPage < totalPages - 2) pages.push("...");
+                    pages.push(totalPages);
+                  }
+                  return pages.map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`e-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          currentPage === p
+                            ? "bg-[#496B92] text-white"
+                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >{p}</button>
+                    )
+                  );
+                })()}
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}

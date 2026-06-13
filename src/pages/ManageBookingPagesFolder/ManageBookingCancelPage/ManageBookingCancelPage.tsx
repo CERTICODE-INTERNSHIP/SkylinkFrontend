@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import { X, AlertTriangle, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cancelBooking } from "@/api/bookings.api";
 
 import { ROUTES } from "@/constants/routes";
@@ -22,6 +22,20 @@ const ManageBookingCancelPage = () => {
     () => loadManageBookingById(id),
     ["manage-booking-detail", id],
   );
+
+  const detailHref = booking ? ROUTES.MANAGE_BOOKING_DETAIL.replace(":id", booking.id) : "";
+  const canceledHref = booking ? ROUTES.MANAGE_BOOKING_CANCELED.replace(":id", booking.id) : "";
+
+  useEffect(() => {
+    if (!booking) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isCancelling) {
+        navigate(detailHref);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [detailHref, navigate, isCancelling, booking]);
 
   if (isLoading && !booking) {
     return (
@@ -45,13 +59,6 @@ const ManageBookingCancelPage = () => {
   }
 
   const refundAmount = Math.max(booking.total - booking.cancellationFee, 0);
-
-  const detailHref = ROUTES.MANAGE_BOOKING_DETAIL.replace(":id", booking.id);
-
-  const canceledHref = ROUTES.MANAGE_BOOKING_CANCELED.replace(
-    ":id",
-    booking.id,
-  );
 
   return (
     <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7] px-6 py-8">

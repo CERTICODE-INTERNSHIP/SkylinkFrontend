@@ -200,7 +200,14 @@ const PaymentPage = () => {
             </div>
 
             {method === "card" ? (
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <form
+                id="payment-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePay();
+                }}
+                className="mt-5 grid gap-4 sm:grid-cols-2"
+              >
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-600">
                     Card Number *
@@ -257,7 +264,7 @@ const PaymentPage = () => {
                   <Lock className="h-4 w-4 text-slate-400" />
                   Your payment is secured with 256-bit SSL encryption.
                 </div>
-              </div>
+              </form>
             ) : (
               <div className="mt-6 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
                 You will be redirected to complete this payment method securely once you click Pay Now.
@@ -281,8 +288,9 @@ const PaymentPage = () => {
               </span>
             </div>
             <button
-              type="button"
-              onClick={handlePay}
+              type={method === "card" ? "submit" : "button"}
+              form={method === "card" ? "payment-form" : undefined}
+              onClick={method !== "card" ? handlePay : undefined}
               disabled={isProcessing}
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#5D7FA7] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4E6B8D] disabled:opacity-60"
             >

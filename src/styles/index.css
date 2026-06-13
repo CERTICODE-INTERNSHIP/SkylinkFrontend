@@ -170,6 +170,13 @@
   a { color: var(--text-link); }
   a:hover { color: var(--text-link-hover); }
 
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    cursor: pointer;
+  }
+
   * { box-sizing: border-box; }
 }
 

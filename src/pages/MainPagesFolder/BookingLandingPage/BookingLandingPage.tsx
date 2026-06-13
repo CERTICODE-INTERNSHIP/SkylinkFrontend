@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { colors, typography } from "@/constants/theme";
 import { ROUTES } from "@/constants/routes";
 import { CiLocationOn, CiSearch, CiClock2 } from "react-icons/ci";
@@ -354,6 +354,7 @@ function SectionHeader({
 }
 
 const BookingLandingPage = () => {
+  const navigate = useNavigate();
   const [tripType, setTripType] = useState<TripType>("one-way");
   const [fromQuery, setFromQuery] = useState("Manila (MNL)");
   const [toQuery, setToQuery] = useState("Cebu (CEB)");
@@ -510,7 +511,13 @@ const BookingLandingPage = () => {
 
         {/* Search card */}
         <div className="relative z-10 mx-auto mb-16 mt-8 w-full max-w-200 px-4">
-          <div className="bg-bg-page rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.08)] p-6 flex flex-col gap-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate(searchHref);
+            }}
+            className="bg-bg-page rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.08)] p-6 flex flex-col gap-4"
+          >
             {/* Trip type pills */}
             <div className="flex gap-2">
               <TripTypePill tripType={tripType} setTripType={setTripType} />
@@ -631,14 +638,14 @@ const BookingLandingPage = () => {
             </div>
 
             {/* Search CTA */}
-            <Link
-              to={searchHref}
+            <button
+              type="submit"
               className={`w-full bg-[#496B92] hover:bg-[#3B5470] ${typography.label.md.semiBold} h-14 rounded-[10px] flex items-center justify-center gap-2 transition-colors text-white`}
             >
               <CiSearch size={18} strokeWidth={1.5} className="shrink-0" />
               Search Flights
-            </Link>
-          </div>
+            </button>
+          </form>
         </div>
       </section>
 

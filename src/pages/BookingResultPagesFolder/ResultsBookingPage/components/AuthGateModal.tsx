@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 
@@ -8,6 +9,17 @@ type AuthGateModalProps = {
 };
 
 const AuthGateModal = ({ open, onClose, continueTo }: AuthGateModalProps) => {
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
   if (!open) {
     return null;
   }

@@ -195,7 +195,14 @@ const PassengerDetailsPage = () => {
         <BookingStepper activeId={1} searchSuffix={searchSuffix} />
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           {/* Form */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <form
+            id="passenger-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleContinue();
+            }}
+            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAF0F7] text-[#5D7FA7]">
                 <User className="h-4 w-4" />
@@ -312,7 +319,7 @@ const PassengerDetailsPage = () => {
               <Info className="mt-0.5 h-4 w-4 text-slate-400 shrink-0" />
               <span>Please ensure passenger details match exactly as written in the official ID or passport.</span>
             </div>
-          </div>
+          </form>
 
           {/* Sidebar */}
           <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -357,8 +364,8 @@ const PassengerDetailsPage = () => {
               <span className="text-lg font-semibold text-[#5D7FA7]">{total}</span>
             </div>
             <button
-              type="button"
-              onClick={handleContinue}
+              type="submit"
+              form="passenger-form"
               className="mt-4 flex w-full items-center justify-center rounded-lg bg-[#5D7FA7] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4E6B8D]"
             >
               Continue to Seat Selection

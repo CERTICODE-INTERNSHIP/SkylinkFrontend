@@ -10,7 +10,13 @@ const BookingCard = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-5 rounded-2xl border border-[var(--color-tertiary-30)] bg-white px-6 py-6">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleRetrieve();
+      }}
+      className="flex w-full flex-col gap-5 rounded-2xl border border-[var(--color-tertiary-30)] bg-white px-6 py-6"
+    >
 
       {/* PNR Input */}
       <div className="flex flex-col gap-2">
@@ -31,8 +37,7 @@ const BookingCard = () => {
 
       {/* Retrieve Button */}
       <button
-        type="button"
-        onClick={handleRetrieve}
+        type="submit"
         className={`${typography.label.md.semiBold} ${colors.action.primary} ${colors.text.onPrimary} flex items-center justify-center w-full h-12 rounded-[14px] py-3 text-center`}
       >
         Retrieve Booking
@@ -48,7 +53,7 @@ const BookingCard = () => {
       >
         Sign In to View All Bookings
       </Link>
-    </div>
+    </form>
   );
 };
 

@@ -168,7 +168,7 @@ const PaymentPage = () => {
           </Link>
         </div>
 
-        <BookingStepper activeId={4} searchSuffix={searchSuffix} />
+        <BookingStepper activeId={5} searchSuffix={searchSuffix} />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

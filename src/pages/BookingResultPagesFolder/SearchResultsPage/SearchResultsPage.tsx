@@ -9,6 +9,7 @@ import FlightResultCard, {
 import { searchFlights } from "@/api/flights.api";
 import type { CabinClass, Flight, FlightSearchParams } from "@/types";
 import useAsyncValue from "@/hooks/useAsyncValue";
+import { PlaneTakeoff, SlidersHorizontal, RotateCcw } from "lucide-react";
 
 const MIN_PRICE = 1000;
 const MAX_PRICE = 50000;
@@ -160,6 +161,12 @@ const SearchResultsPage = () => {
     );
   };
 
+  const resetFilters = () => {
+    setMaxPrice(MAX_PRICE);
+    setDirectOnly(false);
+    setTimeFilters([]);
+  };
+
   return (
     <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
       <section className="border-b border-slate-200 bg-white">
@@ -213,6 +220,41 @@ const SearchResultsPage = () => {
                 <FlightResultCardSkeleton />
                 <FlightResultCardSkeleton />
               </div>
+            ) : filteredFlights.length === 0 ? (
+              baseFlights.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm animate-fade-in">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-6">
+                    <PlaneTakeoff className="h-10 w-10 text-[#5D7FA7] animate-pulse" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">No Flights Scheduled</h3>
+                  <p className="text-sm text-slate-500 max-w-md mb-8 leading-relaxed">
+                    We currently don't have any flights scheduled from <span className="font-semibold text-slate-700">{fromLabel}</span> to <span className="font-semibold text-slate-700">{toLabel}</span> for the selected date and class.
+                  </p>
+                  <Link
+                    to={ROUTES.BOOK}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#5D7FA7] hover:bg-[#1e2d4a] text-white px-6 py-3 font-semibold text-sm shadow-md transition-all cursor-pointer"
+                  >
+                    Edit Search Criteria
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm animate-fade-in">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-6">
+                    <SlidersHorizontal className="h-10 w-10 text-[#5D7FA7] animate-bounce" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">No Flights Match Your Filters</h3>
+                  <p className="text-sm text-slate-500 max-w-md mb-8 leading-relaxed">
+                    Try adjusting or resetting your price range, stop count, or departure times to view the <span className="font-semibold text-slate-700">{baseFlights.length} available flights</span> on this route.
+                  </p>
+                  <button
+                    onClick={resetFilters}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#5D7FA7] hover:bg-[#1e2d4a] text-white px-6 py-3 font-semibold text-sm shadow-md cursor-pointer transition-all"
+                  >
+                    <RotateCcw size={14} />
+                    Reset All Filters
+                  </button>
+                </div>
+              )
             ) : (
               <div className="space-y-4 animate-slide-up">
                 {filteredFlights.map((flight) => (
@@ -232,3 +274,4 @@ const SearchResultsPage = () => {
 };
 
 export default SearchResultsPage;
+

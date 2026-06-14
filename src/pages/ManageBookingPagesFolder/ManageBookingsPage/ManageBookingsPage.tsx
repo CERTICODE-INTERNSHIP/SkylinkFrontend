@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plane, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { Plane, ChevronLeft, ChevronRight, BookOpen, CalendarOff } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import {
   loadManageBookings,
@@ -237,8 +237,20 @@ const ManageBookingsPage = () => {
               })}
 
               {bookings.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-                  No bookings found in this category.
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-sm animate-fade-in">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-4 animate-bounce">
+                    <CalendarOff className="h-8 w-8 text-[#5D7FA7]" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-800 mb-1 capitalize">No {activeTab} Bookings</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mb-6 leading-relaxed">
+                    You don't have any flights under the <span className="font-semibold text-slate-700">{activeTab}</span> category right now.
+                  </p>
+                  <Link
+                    to={ROUTES.BOOK}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#5D7FA7] hover:bg-[#1a2a4a] text-white px-5 py-2.5 font-semibold text-xs shadow-md transition-all cursor-pointer"
+                  >
+                    Book a Flight
+                  </Link>
                 </div>
               )}
 

@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { colors, typography } from "@/constants/theme";
 import { ROUTES } from "@/constants/routes";
 import { CiSearch, CiClock2 } from "react-icons/ci";
-import { FiMapPin } from "react-icons/fi";
-import { RiPriceTagLine } from "react-icons/ri";
 import { HiChevronRight } from "react-icons/hi2";
 import { getPromotions } from "@/api/promotions.api";
 import { getPublicAirports } from "@/api/destinations.api";
@@ -12,6 +10,7 @@ import { searchFlights } from "@/api/flights.api";
 import type { Flight } from "@/types";
 import type { Promotion } from "@/types/promotion.types";
 import type { Airport } from "@/types/destinations.types";
+import { Compass, MapPin, Tag } from "lucide-react";
 
 // ─── Derived types ────────────────────────────────────────────────────────────
 
@@ -45,7 +44,7 @@ function DestinationCard({ dest }: { dest: Destination }) {
   return (
     <Link
       to={`/explore/destination/${dest.code}`}
-      className="relative h-55 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.06)] w-full text-left hover:shadow-md transition-shadow"
+      className="relative h-55 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.06)] w-full text-left hover:shadow-md transition-shadow cursor-pointer"
     >
       {dest.image ? (
         <img
@@ -75,7 +74,7 @@ function DealCard({ deal, promo }: { deal: Deal; promo: Promotion }) {
     <Link
       to={ROUTES.EXPLORE_PROMO_DETAIL.replace(":id", deal.id)}
       state={{ deal: promo }}
-      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow"
+      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow cursor-pointer"
     >
       <div className="relative h-32.5 bg-tertiary-20">
         {deal.image && (
@@ -257,14 +256,29 @@ const ExplorePage = () => {
           <div className="flex justify-center py-20">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#496B92] border-t-transparent" />
           </div>
+        ) : destinations.length === 0 && deals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-16 text-center shadow-sm animate-fade-in my-8">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-6">
+              <Compass className="h-10 w-10 text-[#496B92] animate-pulse" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">No Destinations or Deals Found</h3>
+            <p className="text-sm text-slate-500 max-w-md mb-8 leading-relaxed">
+              We couldn't find any results matching "<span className="font-semibold text-slate-700">{search}</span>". Please check your spelling or try searching for another city, country, or promo category.
+            </p>
+            <button
+              onClick={() => setSearch("")}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#496B92] hover:bg-[#16202c] text-white px-6 py-3 font-semibold text-sm shadow-md transition-all cursor-pointer"
+            >
+              Clear Search Query
+            </button>
+          </div>
         ) : (
           <>
             {/* Popular Destinations */}
             <section>
               <div className="flex items-center gap-2 mb-5">
-                <FiMapPin
+                <MapPin
                   size={20}
-                  strokeWidth={2}
                   className="shrink-0 text-primary-60"
                 />
                 <h2
@@ -279,11 +293,11 @@ const ExplorePage = () => {
                     <DestinationCard key={dest.id} dest={dest} />
                   ))
                 ) : (
-                  <p
-                    className={`col-span-4 ${typography.paragraph.md.normal} ${colors.text.secondary}`}
-                  >
-                    No destinations found.
-                  </p>
+                  <div className="col-span-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-10 text-center animate-fade-in">
+                    <MapPin className="h-8 w-8 text-slate-300 mb-3" />
+                    <p className="text-sm font-semibold text-slate-700">No Destinations Found</p>
+                    <p className="text-xs text-slate-400 mt-1">There are no popular travel destinations matching your query.</p>
+                  </div>
                 )}
               </div>
             </section>
@@ -292,9 +306,8 @@ const ExplorePage = () => {
             <section>
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
-                  <RiPriceTagLine
+                  <Tag
                     size={20}
-                    strokeWidth={0.5}
                     className="shrink-0 text-primary-60"
                   />
                   <h2
@@ -305,7 +318,7 @@ const ExplorePage = () => {
                 </div>
                 <Link
                   to={ROUTES.EXPLORE_PROMOS}
-                  className={`${typography.label.sm.semiBold} ${colors.text.link} flex items-center gap-1`}
+                  className={`${typography.label.sm.semiBold} ${colors.text.link} flex items-center gap-1 cursor-pointer`}
                 >
                   See all{" "}
                   <HiChevronRight
@@ -325,11 +338,11 @@ const ExplorePage = () => {
                     />
                   ))
                 ) : (
-                  <p
-                    className={`col-span-3 ${typography.paragraph.md.normal} ${colors.text.secondary}`}
-                  >
-                    No deals available.
-                  </p>
+                  <div className="col-span-3 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-10 text-center animate-fade-in">
+                    <Tag className="h-8 w-8 text-slate-300 mb-3" />
+                    <p className="text-sm font-semibold text-slate-700">No Active Deals Found</p>
+                    <p className="text-xs text-slate-400 mt-1">There are no active flight promotions or discount deals matching your query.</p>
+                  </div>
                 )}
               </div>
             </section>

@@ -7,6 +7,9 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
+  AlertCircle,
+  HelpCircle,
+  RefreshCw,
 } from "lucide-react";
 import { searchFlights } from "@/api/flights.api";
 import { getPNRStatus } from "@/api/pnr.api";
@@ -290,11 +293,93 @@ const FlightResultCard = ({
       <div className="px-5 pb-4 pt-1">
         <button
           onClick={onCheckAnother}
-          className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#5E83AE] hover:text-[#1e2d4a] transition-colors"
+          className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#5E83AE] hover:text-[#1e2d4a] transition-colors cursor-pointer"
         >
           <Search size={12} />
           Check Another Flight →
         </button>
+      </div>
+    </div>
+  );
+};
+
+const FlightStatusErrorCard = ({
+  error,
+  searchValue,
+  tabType,
+  onClear,
+}: {
+  error: string;
+  searchValue: string;
+  tabType: TabType;
+  onClear: () => void;
+}) => {
+  const isPnr = tabType === "pnr";
+  const title = isPnr ? "Booking Reference Not Found" : "Flight Number Not Found";
+  const description =
+    error === "An error occurred while checking flight status."
+      ? "We encountered an issue trying to fetch details. Please try again in a few moments."
+      : isPnr
+        ? `We couldn't find any active booking or flight itinerary matching reference "${searchValue}".`
+        : `We couldn't find any scheduled flights matching flight number "${searchValue}".`;
+
+  return (
+    <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden animate-fade-in">
+      {/* Alert status bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-b border-amber-200">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 animate-pulse" />
+          <span className="text-xs font-semibold text-amber-700">Search Feedback</span>
+        </div>
+        <span className="text-xs font-bold tracking-widest text-amber-700 uppercase">
+          {searchValue}
+        </span>
+      </div>
+
+      {/* Main card body */}
+      <div className="px-5 py-6">
+        <div className="flex flex-col items-center text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 mb-4 animate-bounce">
+            <HelpCircle className="h-8 w-8" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-2">{title}</h3>
+          <p className="text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
+            {description}
+          </p>
+        </div>
+
+        <div className="my-5 border-t border-dashed border-slate-200" />
+
+        {/* Helpful instructions checklist */}
+        <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-600">
+          <p className="font-semibold text-slate-700 mb-2">How to resolve this:</p>
+          <ul className="space-y-1.5 list-disc pl-4 leading-relaxed">
+            {isPnr ? (
+              <>
+                <li>Double check the spelling of your 6-digit PNR / Booking Reference (e.g. <span className="font-semibold">ABC123</span>).</li>
+                <li>Make sure there are no spaces or special characters in the PNR field.</li>
+                <li>If you just booked your flight, the system might take a few minutes to process the database record.</li>
+              </>
+            ) : (
+              <>
+                <li>Verify your flight number format matches standard codes (e.g. <span className="font-semibold">PR101</span>).</li>
+                <li>Ensure the flight is scheduled for today or an active flight status window.</li>
+                <li>Check with the airline operator if the flight number has been changed or rescheduled.</li>
+              </>
+            )}
+          </ul>
+        </div>
+
+        {/* Check Another Flight */}
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={onClear}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#5E83AE] hover:text-[#1e2d4a] transition-colors cursor-pointer"
+          >
+            <RefreshCw size={12} />
+            Clear and Try Again
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -310,6 +395,7 @@ const FlightStatusPage = () => {
   });
   const [result, setResult] = useState<FlightResult | null>(null);
   const [error, setError] = useState<string>("");
+  const [searchedValue, setSearchedValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const config = TAB_CONFIG[activeTab];
@@ -318,6 +404,7 @@ const FlightStatusPage = () => {
   useEffect(() => {
     setResult(null);
     setError("");
+    setSearchedValue("");
   }, [activeTab]);
 
   const handleSubmit = async () => {
@@ -329,6 +416,7 @@ const FlightStatusPage = () => {
 
     setIsLoading(true);
     setError("");
+    setSearchedValue(val);
 
     try {
       if (activeTab === "pnr") {
@@ -364,6 +452,7 @@ const FlightStatusPage = () => {
   const handleCheckAnother = () => {
     setResult(null);
     setError("");
+    setSearchedValue("");
     setValues({ pnr: "", flight: "" });
   };
 
@@ -423,12 +512,14 @@ const FlightStatusPage = () => {
                   </span>
                 ))}
               </p>
-              {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+              {error && error === "Please enter a value." && (
+                <p className="mt-2 text-xs text-red-500">{error}</p>
+              )}
             </div>
 
             <button
               onClick={() => void handleSubmit()}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5E83AE] py-3.5 text-sm font-semibold text-white hover:bg-[#1e2d4a] transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5E83AE] py-3.5 text-sm font-semibold text-white hover:bg-[#1e2d4a] transition-colors cursor-pointer"
             >
               <Search size={16} />
               {isLoading ? "Checking..." : "Check Status"}
@@ -439,6 +530,15 @@ const FlightStatusPage = () => {
             <FlightResultCard
               data={result}
               onCheckAnother={handleCheckAnother}
+            />
+          )}
+
+          {error && error !== "Please enter a value." && (
+            <FlightStatusErrorCard
+              error={error}
+              searchValue={searchedValue}
+              tabType={activeTab}
+              onClear={handleCheckAnother}
             />
           )}
         </div>

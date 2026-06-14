@@ -7,9 +7,7 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
-  AlertCircle,
   HelpCircle,
-  RefreshCw,
 } from "lucide-react";
 import { searchFlights } from "@/api/flights.api";
 import { getPNRStatus } from "@/api/pnr.api";
@@ -324,63 +322,20 @@ const FlightStatusErrorCard = ({
         : `We couldn't find any scheduled flights matching flight number "${searchValue}".`;
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden animate-fade-in">
-      {/* Alert status bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-b border-amber-200">
-        <div className="flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-600 animate-pulse" />
-          <span className="text-xs font-semibold text-amber-700">Search Feedback</span>
-        </div>
-        <span className="text-xs font-bold tracking-widest text-amber-700 uppercase">
-          {searchValue}
-        </span>
+    <div className="mt-5 flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-md animate-fade-in">
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-6">
+        <HelpCircle className="h-10 w-10 text-[#5D7FA7] animate-pulse" />
       </div>
-
-      {/* Main card body */}
-      <div className="px-5 py-6">
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 mb-4 animate-bounce">
-            <HelpCircle className="h-8 w-8" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-2">{title}</h3>
-          <p className="text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
-            {description}
-          </p>
-        </div>
-
-        <div className="my-5 border-t border-dashed border-slate-200" />
-
-        {/* Helpful instructions checklist */}
-        <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-600">
-          <p className="font-semibold text-slate-700 mb-2">How to resolve this:</p>
-          <ul className="space-y-1.5 list-disc pl-4 leading-relaxed">
-            {isPnr ? (
-              <>
-                <li>Double check the spelling of your 6-digit PNR / Booking Reference (e.g. <span className="font-semibold">ABC123</span>).</li>
-                <li>Make sure there are no spaces or special characters in the PNR field.</li>
-                <li>If you just booked your flight, the system might take a few minutes to process the database record.</li>
-              </>
-            ) : (
-              <>
-                <li>Verify your flight number format matches standard codes (e.g. <span className="font-semibold">PR101</span>).</li>
-                <li>Ensure the flight is scheduled for today or an active flight status window.</li>
-                <li>Check with the airline operator if the flight number has been changed or rescheduled.</li>
-              </>
-            )}
-          </ul>
-        </div>
-
-        {/* Check Another Flight */}
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={onClear}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#5E83AE] hover:text-[#1e2d4a] transition-colors cursor-pointer"
-          >
-            <RefreshCw size={12} />
-            Clear and Try Again
-          </button>
-        </div>
-      </div>
+      <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
+      <p className="text-sm text-slate-500 max-w-md mb-8 leading-relaxed">
+        {description}
+      </p>
+      <button
+        onClick={onClear}
+        className="inline-flex items-center gap-2 rounded-xl bg-[#5D7FA7] hover:bg-[#1e2d4a] text-white px-6 py-3 font-semibold text-sm shadow-md transition-all cursor-pointer"
+      >
+        Clear and Try Again
+      </button>
     </div>
   );
 };
